@@ -2,6 +2,11 @@ require 'active_support/all'
 require 'httparty'
 require 'galaxy'
 
+module Galaxy
+  class ValidationError < StandardError
+  end
+end
+
 module Galaxy::Base
   extend ActiveSupport::Concern
 
@@ -100,10 +105,14 @@ module Galaxy::Base
     @endpoint ||= name.pluralize
   end
 
+  # ensures we have a 2xx status code, otherwise, raise error.
   def assert_response!(response)
     pr = response.parsed_response
 
-    unless response.code == 200
+    case
+    when response.code == 422
+      raise Galaxy::ValidationError, "#{pr['error_msg'].inspect} (#{response.code})"
+    when response.code >= 500
       raise RuntimeError, "#{pr['error_msg'].inspect} (#{response.code})"
     end
   end

@@ -3,8 +3,9 @@ require 'httparty'
 require 'galaxy'
 
 module Galaxy
-  class ValidationError < StandardError
-  end
+  class NotFoundError < StandardError; end
+  class ValidationError < StandardError; end
+  class InternalError < StandardError; end
 end
 
 module Galaxy::Base
@@ -110,10 +111,12 @@ module Galaxy::Base
     pr = response.parsed_response
 
     case
+    when response.code == 404
+      raise Galaxy::NotFoundError, "#{pr['error_msg'].inspect} (#{response.code})"
     when response.code == 422
       raise Galaxy::ValidationError, "#{pr['error_msg'].inspect} (#{response.code})"
     when response.code >= 500
-      raise RuntimeError, "#{pr['error_msg'].inspect} (#{response.code})"
+      raise Galaxy::InternalError, "#{pr['error_msg'].inspect} (#{response.code})"
     end
   end
 

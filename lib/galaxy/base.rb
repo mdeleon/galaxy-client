@@ -5,6 +5,7 @@ require 'galaxy'
 module Galaxy
   class NotFoundError < StandardError; end
   class InternalError < StandardError; end
+  class InvalidResponseError < StandardError; end
 
   class ValidationError < StandardError
     attr_reader :errors
@@ -70,6 +71,7 @@ module Galaxy::Base
   end
 
   def digest(response)
+    raise Galaxy::InvalidResponseError.new("Resource element not found in response") unless response[name]
     @attributes = HashWithIndifferentAccess.new(
       self.class.underscore_keys(response[name])
     )

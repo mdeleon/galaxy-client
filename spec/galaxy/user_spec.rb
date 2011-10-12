@@ -6,14 +6,14 @@ describe Galaxy::User do
     it "succeeds" do
       stub_request(:post, /.*\/users.*/).to_return(fixture("users/create_valid.json"))
 
-      sub = Galaxy::Subscription.create(:email => "foo@bar.com")
+      sub = Galaxy::User.create(:email => "foo@bar.com")
       sub.id.should be
     end
 
     it "succeeds for any 200 response code" do
       stub_request(:post, /.*\/users.*/).to_return(fixture("users/create_accepted.json"))
 
-      sub = Galaxy::Subscription.create(:user_id => "DEFG1234", :postal_code => "94110")
+      sub = Galaxy::User.create(:email => "foo@bar.com")
       sub.id.should be
     end
   end

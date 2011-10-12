@@ -47,7 +47,7 @@ module Galaxy::Base
 
     def [](id)
       instance = new(:id => id)
-      instance.retrieve
+      instance.find
       instance
     end
 
@@ -91,7 +91,7 @@ module Galaxy::Base
     response
   end
 
-  def retrieve
+  def find
     response = self.class.get("/#{endpoint}/#{id}")
     assert_response! response
 

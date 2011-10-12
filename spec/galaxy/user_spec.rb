@@ -16,11 +16,5 @@ describe Galaxy::User do
       sub = Galaxy::Subscription.create(:user_id => "DEFG1234", :postal_code => "94110")
       sub.id.should be
     end
-
-    it "raises a ValidationError on 422 responses" do
-      stub_request(:post, /.*\/users.*/).to_return(fixture("users/create_invalid.json"))
-
-      expect { Galaxy::Subscription.create(:user_id => "", :postal_code => "") }.to raise_error Galaxy::ValidationError
-    end
   end
 end

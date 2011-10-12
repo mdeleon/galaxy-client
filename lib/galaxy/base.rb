@@ -4,8 +4,16 @@ require 'galaxy'
 
 module Galaxy
   class NotFoundError < StandardError; end
-  class ValidationError < StandardError; end
   class InternalError < StandardError; end
+
+  class ValidationError < StandardError
+    attr_reader :errors
+
+    def initialize(msg, errors)
+      super(msg)
+      @errors = errors
+    end
+  end
 end
 
 module Galaxy::Base
@@ -72,7 +80,6 @@ module Galaxy::Base
   # Returns HTTParty::Response
   def create
     raise RuntimeError if attributes[:id]
-
     response  = self.class.post("/#{endpoint}", :body => self.class.camelize_keys(attributes))
     assert_response! response
 
@@ -109,12 +116,11 @@ module Galaxy::Base
   # ensures we have a 2xx status code, otherwise, raise error.
   def assert_response!(response)
     pr = response.parsed_response
-
     case
     when response.code == 404
       raise Galaxy::NotFoundError, "#{pr['error_msg'].inspect} (#{response.code})"
     when response.code == 422
-      raise Galaxy::ValidationError, "#{pr['error_msg'].inspect} (#{response.code})"
+      raise Galaxy::ValidationError.new("#{pr['error_msg'].inspect} (#{response.code})", pr["model"]["errors"])
     when response.code >= 500
       raise Galaxy::InternalError, "#{pr['error_msg'].inspect} (#{response.code})"
     end
@@ -128,7 +134,7 @@ module Galaxy::Base
       when "="
         attributes[$`] = arguments.first
       when "?"
-        attributes[$`]
+        !!attributes[$`]
       end
     else
       return attributes[method_name] if attributes.include?(method_name)

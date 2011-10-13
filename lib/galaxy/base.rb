@@ -25,7 +25,7 @@ module Galaxy::Base
 
     attr_accessor :attributes
 
-    # base_uri 
+    # base_uri
     default_options[:debug_output] = Galaxy::Config.debug if Galaxy::Config.debug
 
     # ActiveSupport::Concern doesnt allow me to overload class methods so the only way I know
@@ -39,26 +39,30 @@ module Galaxy::Base
   end
 
   module ClassMethods
+    def find(id)
+      instance = new(:id => id)
+      instance.find
+      instance
+    end
+    alias :[] :find
+
     def create(attrs={})
       instance = new(attrs)
       instance.create
       instance
     end
 
-    def [](id)
-      instance = new(:id => id)
-      instance.find
-      instance
-    end
-
+    # helper method for hashes
     def underscore_keys(hash)
       modify_keys(hash) { |key| key.to_s.underscore.to_sym }
     end
 
+    # helper method for hashes
     def camelize_keys(hash)
       modify_keys(hash) { |key| key.to_s.camelize(:lower).to_sym }
     end
 
+    # helper method for hashes
     def modify_keys(hash, &blk)
       hash.inject({}) do |h,(k,v)|
         h.merge(blk.call(k) => v.is_a?(Hash) ? modify_keys(v, &blk) : v)
@@ -68,13 +72,6 @@ module Galaxy::Base
 
   def initialize(attributes={})
     @attributes = attributes.with_indifferent_access
-  end
-
-  def digest(response)
-    raise Galaxy::InvalidResponseError.new("Resource element not found in response") unless response[name]
-    @attributes = HashWithIndifferentAccess.new(
-      self.class.underscore_keys(response[name])
-    )
   end
 
   # Calls #{endpoint}/add
@@ -90,6 +87,7 @@ module Galaxy::Base
 
     response
   end
+  alias :save! :create   # make factory girl friendly
 
   def find
     response = self.class.get("/#{endpoint}/#{id}")
@@ -103,9 +101,6 @@ module Galaxy::Base
 
     response
   end
-
-  # make factory girl friendly
-  alias :save! :create
 
   def name
     @name ||= self.class.to_s.demodulize.downcase
@@ -126,6 +121,14 @@ module Galaxy::Base
     when response.code >= 500
       raise Galaxy::InternalError, "#{pr['error_msg'].inspect} (#{response.code})"
     end
+  end
+
+  # assign attributes from response
+  def digest(response)
+    raise Galaxy::InvalidResponseError.new("Resource element not found in response") unless response[name]
+    @attributes = HashWithIndifferentAccess.new(
+      self.class.underscore_keys(response[name])
+    )
   end
 
   def method_missing(method_symbol, *arguments) #:nodoc:

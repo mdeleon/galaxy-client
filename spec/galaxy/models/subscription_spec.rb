@@ -1,5 +1,5 @@
 require File.expand_path('../../spec_helper', __FILE__)
-require "galaxy/subscription"
+require "galaxy/models/subscription"
 
 describe Galaxy::Subscription do
   describe ".create" do

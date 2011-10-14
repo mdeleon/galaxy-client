@@ -115,11 +115,11 @@ module Galaxy::Base
     pr = response.parsed_response
     case
     when response.code == 404
-      raise Galaxy::NotFoundError, "#{pr['error_msg'].inspect} (#{response.code})"
+      raise Galaxy::NotFoundError, "#{pr['errorMsg'].inspect} (#{response.code})"
     when response.code == 422
-      raise Galaxy::ValidationError.new("#{pr['error_msg'].inspect} (#{response.code})", pr["model"]["errors"])
+      raise Galaxy::ValidationError.new("#{pr['errorMsg'].inspect} (#{response.code})", pr[name]["errors"])
     when response.code >= 500
-      raise Galaxy::InternalError, "#{pr['error_msg'].inspect} (#{response.code})"
+      raise Galaxy::InternalError, "#{pr['errorMsg'].inspect} (#{response.code})"
     end
   end
 

@@ -117,7 +117,7 @@ module Galaxy::Base
     when response.code == 404
       raise Galaxy::NotFoundError, "#{pr['errorMsg'].inspect} (#{response.code})"
     when response.code == 422
-      raise Galaxy::ValidationError.new("#{pr['errorMsg'].inspect} (#{response.code})", pr[name]["errors"])
+      raise Galaxy::ValidationError.new("#{pr['errorMsg'].inspect} (#{response.code})", self.class.underscore_keys(pr[name]["errors"]))
     when response.code >= 500
       raise Galaxy::InternalError, "#{pr['errorMsg'].inspect} (#{response.code})"
     end

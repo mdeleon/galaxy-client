@@ -1,7 +1,11 @@
-require 'galaxy/base'
-
 module Galaxy
-  class User
-    include Galaxy::Base
+  class User < Galaxy::Base
+    def reset_password
+      put(:reset_password)
+    end
+
+    def blacklist
+      put(:blacklist)
+    end
   end
 end

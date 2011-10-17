@@ -1,6 +1,5 @@
-require 'active_support/all'
+require "active_resource"
 require "galaxy/version"
-require "galaxy/config"
 require "galaxy/base"
 require "galaxy/models/subscription"
 require "galaxy/models/user"

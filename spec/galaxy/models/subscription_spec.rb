@@ -2,19 +2,15 @@ require File.expand_path('../../spec_helper', __FILE__)
 require "galaxy/models/subscription"
 
 describe Galaxy::Subscription do
-  describe ".create" do
-    it "succeeds" do
-      stub_request(:post, /.*\/subscriptions.*/).to_return(fixture("subscriptions/create_valid.json"))
+  describe "#subscribe" do
+    it "sends PUT to /subscriptions/:id/subscribe.json"
+  end
 
-      sub = Galaxy::Subscription.create(:user_id => "DEFG1234", :postal_code => "94110")
-      sub.id.should be
-    end
+  describe "#unsubscribe" do
+    it "sends PUT to /subscriptions/:id/unsubscribe.json"
+  end
 
-    it "succeeds for any 200 response code" do
-      stub_request(:post, /.*\/subscriptions.*/).to_return(fixture("subscriptions/create_accepted.json"))
-
-      sub = Galaxy::Subscription.create(:user_id => "DEFG1234", :postal_code => "94110")
-      sub.id.should be
-    end
+  describe "#pause" do
+    it "sends PUT to /subscriptions/:id/pause.json"
   end
 end

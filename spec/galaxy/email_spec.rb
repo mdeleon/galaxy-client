@@ -3,12 +3,28 @@ require "galaxy/email"
 
 describe Galaxy::Email do
   describe ".invite" do
-    it "sends POST to /emails/invite.json"
-    it "encodes params from, to, emails and msg"
+    before(:all) do
+      ActiveResource::HttpMock.respond_to do |mock|
+        mock.post("/api/v2/emails/invite.json?emails%5B%5D=bar1%40example.com&emails%5B%5D=bar2%40example.com&from=foo%40example.com&msg=Hello+World%21",
+                  post_headers, nil, 200)
+      end
+    end
+
+    it "sends POST to /emails/invite.json with params" do
+      Galaxy::Email.invite("foo@example.com", ["bar1@example.com", "bar2@example.com"], "Hello World!")
+    end
   end
 
   describe ".recommend_deal" do
-    it "sends POST to /emails/recommend_deal.json"
-    it "encodes params from, to, deal_id and msg"
+    before(:all) do
+      ActiveResource::HttpMock.respond_to do |mock|
+        mock.post("/api/v2/emails/recommend_deal.json?deal_id=the-big-deal&emails%5B%5D=bar1%40example.com&emails%5B%5D=bar2%40example.com&from=foo%40example.com&msg=Hello+World%21",
+                  post_headers, nil, 200)
+      end
+    end
+
+    it "sends POST to /emails/recommend_deal.json with params" do
+      Galaxy::Email.recommend_deal("foo@example.com", ["bar1@example.com", "bar2@example.com"], "the-big-deal", "Hello World!")
+    end
   end
 end

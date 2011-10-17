@@ -1,6 +1,4 @@
-require "yajl"
 require "rspec"
-require "webmock/rspec"
 require "galaxy"
 
 RSpec.configure do |c|

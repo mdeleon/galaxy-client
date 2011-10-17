@@ -7,8 +7,9 @@ RSpec.configure do |c|
   c.mock_with :rspec
 
   c.before(:suite) do
-    Galaxy::Base.api_key  = "foobar"
-    Galaxy::Base.site     = "https://homerun.offerengine.com/api/v2/"
+    Galaxy::Base.user      = "foo"
+    Galaxy::Base.password  = "bar"
+    Galaxy::Base.site      = "https://partner.offerengine.com/api/v2/?"
   end
 end
 

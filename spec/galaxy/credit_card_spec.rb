@@ -1,5 +1,5 @@
-require File.expand_path('../../../spec_helper', __FILE__)
-require "galaxy/models/credit_card"
+require File.expand_path('../../spec_helper', __FILE__)
+require "galaxy/credit_card"
 
 describe Galaxy::CreditCard do
   describe "#make_primary" do

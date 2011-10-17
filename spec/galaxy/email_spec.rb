@@ -1,5 +1,5 @@
-require File.expand_path('../../../spec_helper', __FILE__)
-require "galaxy/models/email"
+require File.expand_path('../../spec_helper', __FILE__)
+require "galaxy/email"
 
 describe Galaxy::Email do
   describe ".invite" do

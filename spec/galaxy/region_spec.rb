@@ -1,5 +1,5 @@
-require File.expand_path('../../../spec_helper', __FILE__)
-require "galaxy/models/region"
+require File.expand_path('../../spec_helper', __FILE__)
+require "galaxy/region"
 
 describe Galaxy::Region do
   describe "#current_deal" do

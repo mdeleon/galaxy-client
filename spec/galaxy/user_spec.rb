@@ -1,5 +1,5 @@
-require File.expand_path('../../../spec_helper', __FILE__)
-require "galaxy/models/user"
+require File.expand_path('../../spec_helper', __FILE__)
+require "galaxy/user"
 
 describe Galaxy::User do
   describe "#reset_password" do

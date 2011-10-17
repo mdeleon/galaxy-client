@@ -1,5 +1,5 @@
-require File.expand_path('../../../spec_helper', __FILE__)
-require "galaxy/models/purchase"
+require File.expand_path('../../spec_helper', __FILE__)
+require "galaxy/purchase"
 
 describe Galaxy::Purchase do
   describe "#checkout" do

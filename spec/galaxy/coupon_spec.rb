@@ -1,5 +1,5 @@
-require File.expand_path('../../../spec_helper', __FILE__)
-require "galaxy/models/coupon"
+require File.expand_path('../../spec_helper', __FILE__)
+require "galaxy/coupon"
 
 describe Galaxy::Coupon do
   describe "#redeem" do

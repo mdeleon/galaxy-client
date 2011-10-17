@@ -1,5 +1,5 @@
-require File.expand_path('../../../spec_helper', __FILE__)
-require "galaxy/models/deal"
+require File.expand_path('../../spec_helper', __FILE__)
+require "galaxy/deal"
 
 describe Galaxy::Deal do
   describe "#secondary_deals" do

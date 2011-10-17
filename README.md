@@ -25,3 +25,9 @@ user = Galaxy::User.find("abd02123")   # finds user with id
 See documentation for more details:
 
 https://github.com/demandchain/galaxy-client/wiki/Consumer-API-Doc
+
+### Development
+
+You'll probably save yourself a lot of pain during development if you change the Gemfile line to this:
+
+gem 'galaxy-client', :path => '../galaxy-client'

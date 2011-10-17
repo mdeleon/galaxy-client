@@ -1,5 +1,5 @@
 module Galaxy
-  class Region < Galaxy::Base
+  class Email < Galaxy::Base
     def self.invite(from, to, emails, msg=nil)
       post(:invite, :from => from, :to => to, :emails => emails, :msg => msg)
     end

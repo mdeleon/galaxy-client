@@ -1,4 +1,4 @@
 module Galaxy
-  class Deal < Galaxy::Base
+  class Merchant < Galaxy::Base
   end
 end

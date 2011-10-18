@@ -10,3 +10,5 @@ require "galaxy/purchase"
 require "galaxy/region"
 require "galaxy/subscription"
 require "galaxy/user"
+
+require "activeresource/validations"

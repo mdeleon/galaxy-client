@@ -17,15 +17,42 @@ module Galaxy
 
     # @return [Array]
     #   Returns all purchases for the user instance.
+    # The purchases will be memoized.
     # @example
-    #   user = Galaxy::User.find("b9d30f09")
-    #   user.purchases
+    #   user.purchases # => does network request
+    #   user.purchases # => returns purchases from original request (no request)
     def purchases
       @purchases ||= Galaxy::Purchase.find(:all, :from => "/#{self.class.path}/users/#{self.id}/purchases.json")
     end
 
+    # @return [Array]
+    #   Returns all active purchases for the user instance.
+    # The purchases will be memoized.
+    # @example
+    #   user.active_purchases # => does network request
+    #   user.active_purchases # => returns purchases from original request (no request)
     def active_purchases
       @active_purchases ||= Galaxy::Purchase.find(:all, :from => "/#{self.class.path}/users/#{self.id}/purchases.json", :params => { :filter => "active" })
+    end
+
+    # @return [Array]
+    #   Returns all coupons for the user instance.
+    # The coupons will be memoized.
+    # @example
+    #   user.coupons # => does network request
+    #   user.coupons # => returns coupons from original request (no request)
+    def coupons
+      @coupons ||= Galaxy::Purchase.find(:all, :from => "/#{self.class.path}/users/#{self.id}/coupons.json")
+    end
+
+    # @return [Array]
+    #   Returns all active coupons for the user instance.
+    # The coupons will be memoized.
+    # @example
+    #   user.active_coupons # => does network request
+    #   user.active_coupons # => returns coupons from original request (no request)
+    def active_coupons
+      @active_coupons ||= Galaxy::Purchase.find(:all, :from => "/#{self.class.path}/users/#{self.id}/coupons.json", :params => { :filter => "active" })
     end
   end
 end

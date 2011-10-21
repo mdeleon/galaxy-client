@@ -9,7 +9,7 @@ module Galaxy
     def secondary_deals(user=nil)
       params = {}
       user && params.merge(:user_id => user.id)
-      get(:secondary_deals, params) 
+      get(:secondary_deals, params).map { |attrs| Deal.new(attrs) }
     end
 
     # Retrieves the region for a specific deal instance.

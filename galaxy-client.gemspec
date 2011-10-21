@@ -13,7 +13,6 @@ Gem::Specification.new do |s|
   s.description = ""
 
   s.required_rubygems_version = ">= 1.3.6"
-  #s.rubyforge_project         = "galaxy-client"
 
   s.add_dependency "activeresource"
 
@@ -21,6 +20,9 @@ Gem::Specification.new do |s|
   s.add_development_dependency "rspec"
   s.add_development_dependency "webmock"
   s.add_development_dependency "yajl-ruby"
+  s.add_development_dependency "yard"
+  s.add_development_dependency "rdiscount"
+  s.add_development_dependency "rdoc"
 
   s.files        = `git ls-files`.split("\n")
   s.executables  = `git ls-files`.split("\n").select{|f| f =~ /^bin/}

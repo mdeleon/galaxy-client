@@ -12,6 +12,10 @@ module Galaxy
     self.format = :json
 
     # TODO configure this
-    # self.ssl_options 
+    # self.ssl_options
+
+    def self.create!(attributes = {})
+       self.new(attributes).tap { |resource| resource.save! }
+    end
   end
 end

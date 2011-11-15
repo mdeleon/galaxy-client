@@ -18,4 +18,21 @@ describe Galaxy::Region do
       region.current_deal
     end
   end
+
+  describe "#deals" do
+    before(:all) do
+      @region_id = "d02k49d"
+      @deals = [{ :id => "d9c3k19d" }]
+
+      ActiveResource::HttpMock.respond_to do |mock|
+        mock.get("/api/v2/regions/#{@region_id}/deals.json",
+                 get_headers, @deals.to_json, 200)
+      end
+    end
+
+    it "sends GET to /regions/:id/deals.json" do
+      region = Galaxy::Region.new(:id => @region_id)
+      region.deals
+    end
+  end
 end

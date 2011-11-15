@@ -29,15 +29,15 @@ describe Galaxy::User do
   describe ".find_or_create_by_email" do
     before(:all) do
       @user_id = "d02k49d"
-
+      @users = [{ :email => "foo@bar.com" }]
       ActiveResource::HttpMock.respond_to do |mock|
-        mock.post("/api/v2/users/find_or_create_by_email.json?user%5Bemail%5D=foo%40bar.com&user%5Bpostal_code%5D=91210&user%5Bsource%5D=test",
-                  post_headers, nil, 200)
+        mock.get("/api/v2/users/find_by_email.json?email=foo%40bar.com",
+                 get_headers, { :users => @users }.to_json, 200)
       end
     end
 
-    it "sends POST to /users/find_or_create_by_email.json" do
-      Galaxy::User.find_or_create_by_email(:email => "foo@bar.com", :postal_code => 91210, :source => "test")
+    it "sends GET to /users/find_by_email.json" do
+      Galaxy::User.find_by_email("foo@bar.com")
     end
   end
 

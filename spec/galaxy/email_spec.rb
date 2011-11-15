@@ -5,13 +5,13 @@ describe Galaxy::Email do
   describe ".invite" do
     before(:all) do
       ActiveResource::HttpMock.respond_to do |mock|
-        mock.post("/api/v2/emails/invite.json?emails%5B%5D=bar1%40example.com&emails%5B%5D=bar2%40example.com&from=foo%40example.com&msg=Hello+World%21",
+        mock.post("/api/v2/emails/invite.json?emails%5B%5D=bar1%40example.com&emails%5B%5D=bar2%40example.com&message=Hello+World%21&user_id=d92kd030",
                   post_headers, nil, 200)
       end
     end
 
     it "sends POST to /emails/invite.json with params" do
-      Galaxy::Email.invite("foo@example.com", ["bar1@example.com", "bar2@example.com"], "Hello World!")
+      Galaxy::Email.invite(:user_id => "d92kd030", :emails => ["bar1@example.com", "bar2@example.com"], :message => "Hello World!")
     end
   end
 

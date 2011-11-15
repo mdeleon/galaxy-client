@@ -1,14 +1,16 @@
 module Galaxy
   class User < Galaxy::Base
     # lockdown schema if we want.
-    # self.schema = {'name' => :string, 'age' => :integer }
+    # self.schema = {'name' => :string, 'age' => :integer, 'token' => :string }
 
+    # @return [Galaxy::User]
+    def self.find_by_token(token)
+      find(:all, from: "/api/v2/users/find_by_token.json", params: {token: token})
+    end
+
+    # @return [Galaxy::User]
     def self.find_by_email(email)
-      get(:find_by_email, :email => email).map { |attrs| new(attrs) }
-    rescue ActiveResource::ResourceInvalid => e
-      instance = new(:email => email)
-      instance.load_remote_errors(e)
-      raise ActiveResource::ResourceInvalid.new(instance)
+      find(:all, from: "/api/v2/users/find_by_email.json", params: {email: email})
     end
 
     def reset_password

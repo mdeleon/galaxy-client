@@ -3,8 +3,12 @@ module Galaxy
     # lockdown schema if we want.
     # self.schema = {'name' => :string, 'age' => :integer }
 
-    def self.find_or_create_by_email(params)
-      new(post(:find_or_create_by_email, :user => params))
+    def self.find_by_email(email)
+      get(:find_by_email, :email => email).map { |attrs| new(attrs) }
+    rescue ActiveResource::ResourceInvalid => e
+      instance = new(:email => email)
+      instance.load_remote_errors(e)
+      raise ActiveResource::ResourceInvalid.new(instance)
     end
 
     def reset_password

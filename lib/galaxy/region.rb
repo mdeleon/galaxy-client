@@ -1,7 +1,7 @@
 module Galaxy
   class Region < Galaxy::Base
     def current_deal
-      get(:current_deal)
+      Galaxy::Deal.new(get(:current_deal))
     end
 
     def deals

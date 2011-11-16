@@ -11,10 +11,6 @@ RSpec.configure do |c|
   end
 end
 
-def fixture(path)
-  File.new File.expand_path("../fixtures/#{path}", __FILE__)
-end
-
 def get_headers(opts={})
   { "Authorization" => "Basic Zm9vOmJhcg==", "Accept" => "application/json" }.merge(opts)
 end

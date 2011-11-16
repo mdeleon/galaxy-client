@@ -1,5 +1,0 @@
-HTTP/1.1 422 Unprocessable Entity
-Content-Type: application/json; charset=utf-8
-Status: 422 Unprocessable Entity
-
-{"status": "error", "user": { "errors" : {"email": ["is missing", "is invalid"] }}}

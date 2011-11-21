@@ -12,6 +12,20 @@ module Galaxy
       get(:secondary_deals, params).map { |attrs| Deal.new(attrs) }
     end
 
+    def link_to_card(user)
+      begin
+        post :link_to_card, :user_id => user.id
+      rescue ActiveResource::ResourceInvalid => e
+        instance = new(params)
+        instance.load_remote_errors(e)
+        raise ActiveResource::ResourceInvalid.new(instance)
+      end
+    end
+
+    def unlink_from_card(user)
+      post :unlink_from_card, :user_id => user.id
+    end
+
     # Retrieves the region for a specific deal instance.
     # The region will be memoized.
     # @example

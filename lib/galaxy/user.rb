@@ -33,6 +33,26 @@ module Galaxy
     end
 
     # @return [Array]
+    #   Returns all subscriptions for the user instance.
+    # The subscriptions will be memoized.
+    # @example
+    #   user.subscriptions # => does network request
+    #   user.subscriptions # => returns subscriptions from original request (no request)
+    def subscriptions
+      @subscriptions ||= Galaxy::Subscription.find(:all, :from => "/#{self.class.path}/users/#{self.id}/subscriptions.json")
+    end
+
+    # @return [Array]
+    #   Returns all credit cards for the user instance.
+    # The credit cards will be memoized.
+    # @example
+    #   user.credit_cards # => does network request
+    #   user.credit_cards # => returns credit cards from original request (no request)
+    def credit_cards
+      @credit_cards ||= Galaxy::CreditCard.find(:all, :from => "/#{self.class.path}/users/#{self.id}/credit_cards.json")
+    end
+
+    # @return [Array]
     #   Returns all active purchases for the user instance.
     # The purchases will be memoized.
     # @example

@@ -50,7 +50,7 @@ module Galaxy
 
     # Helper method.
     def discount
-      value - current_price
+      value - price
     end
 
     # Helper method.

@@ -4,8 +4,8 @@ module Galaxy
       Galaxy::Deal.new(get(:current_deal))
     end
 
-    def deals
-      @deals ||= Galaxy::Deal.find(:all, :from => "/api/v2/regions/#{self.id}/deals.json")
+    def deals(filter={})
+      @deals ||= Galaxy::Deal.find(:all, :from => "/api/v2/regions/#{self.id}/deals.json", :params => filter)
     end
   end
 end

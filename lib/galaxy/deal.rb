@@ -21,6 +21,10 @@ module Galaxy
       @region ||= Galaxy::Region.find(self.region_id)
     end
 
+    def purchases
+      @region ||= Galaxy::Purchase.find(:all, :from => "/#{self.class.path}/deals/#{self.id}/purchases.json")
+    end
+
     # Retrieves the merchant for a specific deal instance.
     # The merchant will be memoized.
     # @example

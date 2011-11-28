@@ -69,7 +69,7 @@ module Galaxy
     #   user.coupons # => does network request
     #   user.coupons # => returns coupons from original request (no request)
     def coupons
-      @coupons ||= Galaxy::Purchase.find(:all, :from => "/#{self.class.path}/users/#{self.id}/coupons.json")
+      @coupons ||= Galaxy::Coupon.find(:all, :from => "/#{self.class.path}/users/#{self.id}/coupons.json")
     end
 
     # @return [Array]

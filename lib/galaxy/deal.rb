@@ -21,8 +21,10 @@ module Galaxy
       @region ||= Galaxy::Region.find(self.region_id)
     end
 
-    def purchases
-      @region ||= Galaxy::Purchase.find(:all, :from => "/#{self.class.path}/deals/#{self.id}/purchases.json")
+    def last_purchases(params={})
+      params ||= {}
+      params.merge(:deal_id => self.id)
+      get(:last_purchases, params).map { |attrs| Galaxy::Purchase.new(attrs) }
     end
 
     # Retrieves the merchant for a specific deal instance.

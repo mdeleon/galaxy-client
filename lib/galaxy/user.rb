@@ -28,8 +28,8 @@ module Galaxy
     # @example
     #   user.purchases # => does network request
     #   user.purchases # => returns purchases from original request (no request)
-    def purchases
-      @purchases ||= Galaxy::Purchase.find(:all, :from => "/#{self.class.path}/users/#{self.id}/purchases.json")
+    def purchases(params={})
+      @purchases ||= Galaxy::Purchase.find(:all, :from => "/#{self.class.path}/users/#{self.id}/purchases.json", :params => params)
     end
 
     # @return [Array]

@@ -9,7 +9,7 @@ module Galaxy
     def secondary_deals(user=nil)
       params = {}
       user && params.merge(:user_id => user.id)
-      get(:secondary_deals, params).map { |attrs| Deal.new(attrs) }
+      get(:secondary_deals, params).map { |attrs| model_for(:deal).new(attrs) }
     end
 
     # Retrieves the region for a specific deal instance.
@@ -18,13 +18,13 @@ module Galaxy
     #   deal.region # => does network request
     #   deal.region # => returns region from original request (no request)
     def region
-      @region ||= Galaxy::Region.find(self.region_id)
+      @region ||= model_for(:region).find(self.region_id)
     end
 
     def last_purchases(params={})
       params ||= {}
       params.merge(:deal_id => self.id)
-      get(:last_purchases, params).map { |attrs| Galaxy::Purchase.new(attrs) }
+      get(:last_purchases, params).map { |attrs| model_for(:purchase).new(attrs) }
     end
 
     # Retrieves the merchant for a specific deal instance.
@@ -34,7 +34,7 @@ module Galaxy
     #   deal.merchant # => returns merchant from original request (no request)
     def merchant
       # TODO: modify for eager loading of objects...
-      @merchant ||= Galaxy::Merchant.find(self.merchant_id)
+      @merchant ||= model_for(:merchant).find(self.merchant_id)
     end
 
     # Parses the time String since JSON doesn't support time objects.

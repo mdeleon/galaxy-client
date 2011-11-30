@@ -29,7 +29,7 @@ module Galaxy
     #   user.purchases # => does network request
     #   user.purchases # => returns purchases from original request (no request)
     def purchases(params={})
-      @purchases ||= Galaxy::Purchase.find(:all, :from => "/#{self.class.path}/users/#{self.id}/purchases.json", :params => params)
+      @purchases ||= model_for(:purchase).find(:all, :from => "/#{self.class.path}/users/#{self.id}/purchases.json", :params => params)
     end
 
     # @return [Array]
@@ -39,7 +39,7 @@ module Galaxy
     #   user.subscriptions # => does network request
     #   user.subscriptions # => returns subscriptions from original request (no request)
     def subscriptions
-      @subscriptions ||= Galaxy::Subscription.find(:all, :from => "/#{self.class.path}/users/#{self.id}/subscriptions.json")
+      @subscriptions ||= model_for(:subscription).find(:all, :from => "/#{self.class.path}/users/#{self.id}/subscriptions.json")
     end
 
     # @return [Array]
@@ -49,7 +49,7 @@ module Galaxy
     #   user.credit_cards # => does network request
     #   user.credit_cards # => returns credit cards from original request (no request)
     def credit_cards
-      @credit_cards ||= Galaxy::CreditCard.find(:all, :from => "/#{self.class.path}/users/#{self.id}/credit_cards.json")
+      @credit_cards ||= model_for(:credit_card).find(:all, :from => "/#{self.class.path}/users/#{self.id}/credit_cards.json")
     end
 
     # @return [Array]
@@ -59,7 +59,7 @@ module Galaxy
     #   user.active_purchases # => does network request
     #   user.active_purchases # => returns purchases from original request (no request)
     def active_purchases
-      @active_purchases ||= Galaxy::Purchase.find(:all, :from => "/#{self.class.path}/users/#{self.id}/purchases.json", :params => { :filter => "active" })
+      @active_purchases ||= model_for(:purchase).find(:all, :from => "/#{self.class.path}/users/#{self.id}/purchases.json", :params => { :filter => "active" })
     end
 
     # @return [Array]
@@ -69,7 +69,7 @@ module Galaxy
     #   user.coupons # => does network request
     #   user.coupons # => returns coupons from original request (no request)
     def coupons
-      @coupons ||= Galaxy::Coupon.find(:all, :from => "/#{self.class.path}/users/#{self.id}/coupons.json")
+      @coupons ||= model_for(:coupon).find(:all, :from => "/#{self.class.path}/users/#{self.id}/coupons.json")
     end
 
     # @return [Array]
@@ -79,7 +79,7 @@ module Galaxy
     #   user.active_coupons # => does network request
     #   user.active_coupons # => returns coupons from original request (no request)
     def active_coupons
-      @active_coupons ||= Galaxy::Purchase.find(:all, :from => "/#{self.class.path}/users/#{self.id}/coupons.json", :params => { :filter => "active" })
+      @active_coupons ||= model_for(:coupon).find(:all, :from => "/#{self.class.path}/users/#{self.id}/coupons.json", :params => { :filter => "active" })
     end
   end
 end

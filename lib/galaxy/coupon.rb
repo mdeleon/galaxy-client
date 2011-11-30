@@ -5,7 +5,7 @@ module Galaxy
     end
 
     def deal
-      @deal ||= Galaxy::Deal.find(self.deal_id)
+      @deal ||= model_for(:deal).find(self.deal_id)
     end
   end
 end

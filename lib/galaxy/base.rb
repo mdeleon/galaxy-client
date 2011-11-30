@@ -17,5 +17,22 @@ module Galaxy
     def self.create!(attributes = {})
        self.new(attributes).tap { |resource| resource.save! }
     end
+
+    # This method takes a galaxy client model name and returns the corresponding model class
+    # The returned model class is either a model class defined by the application (which is derived from
+    # Galaxy client's class), or the Galaxy client's class itself.  For example, model_for(:user)
+    # will trigger this method to look for a User class in the global scope.  If such a class is found
+    # and it is extended from Galaxy client's User class, then the global scope ::User class is returned.
+    # Otherwise, Galaxy::User class is returned.  If Galaxy::User cannot be found either, a NameError exception
+    # will be raised.
+
+    def model_for(class_name)
+      name = class_name.to_s.split('::').last.camelize
+      galaxy_model_class = "Galaxy::#{name}".constantize
+      # use derived model class if we can find one
+      (c = "::#{name}".constantize) && c < galaxy_model_class && c || galaxy_model_class
+      rescue NameError => e
+        galaxy_model_class || raise(e)
+    end
   end
 end

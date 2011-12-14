@@ -24,7 +24,7 @@ module Galaxy
       params = { email: email };
       post(:forgot_password, params)
     rescue ActiveResource::ResourceInvalid => e
-      instance = new(params: params)
+      instance = new(email: params)
       instance.load_remote_errors(e)
       raise ActiveResource::ResourceInvalid.new(instance)
     end

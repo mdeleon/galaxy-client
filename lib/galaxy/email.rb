@@ -21,7 +21,12 @@ module Galaxy
     end
 
     def self.forgot_password(email)
-      post(:forgot_password, :email => email)
+      params = { email: email };
+      post(:forgot_password, params)
+    rescue ActiveResource::ResourceInvalid => e
+      instance = new(params: params)
+      instance.load_remote_errors(e)
+      raise ActiveResource::ResourceInvalid.new(instance)
     end
   end
 end

@@ -21,7 +21,11 @@ module Galaxy
     end
 
     def reset_password(token, pass, pass_confirmation)
-      put(:reset_password, token: token, pass: pass, pass_confirmation: pass_confirmation)
+      params = { token: token, pass: pass, pass_confirmation: pass_confirmation }
+      put(:reset_password, params)
+    rescue ActiveResource::ResourceInvalid => e
+      load_remote_errors(e)
+      raise ActiveResource::ResourceInvalid.new(self)
     end
 
     def blacklist

@@ -19,5 +19,14 @@ module Galaxy
     def self.recommend_deal(from, to_emails, deal_id, msg=nil)
       post(:recommend_deal, :from => from, :emails => to_emails, :deal_id => deal_id, :msg => msg)
     end
+
+    def self.forgot_password(email)
+      params = { email: email };
+      post(:forgot_password, params)
+    rescue ActiveResource::ResourceInvalid => e
+      instance = new(email: params)
+      instance.load_remote_errors(e)
+      raise ActiveResource::ResourceInvalid.new(instance)
+    end
   end
 end

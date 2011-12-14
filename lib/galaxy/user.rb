@@ -14,8 +14,18 @@ module Galaxy
       find(:all, from: "/api/v2/users/find_by_email.json", params: {email: email})
     end
 
-    def reset_password
-      put(:reset_password)
+    # @return [Galaxy::User]
+    #   Return the authenticated user
+    def self.authenticate(email, passwd)
+      new(get(:authenticate, email: email, pass: passwd), true)
+    end
+
+    def reset_password(token, pass, pass_confirmation)
+      params = { token: token, pass: pass, pass_confirmation: pass_confirmation }
+      put(:reset_password, params)
+    rescue ActiveResource::ResourceInvalid => e
+      load_remote_errors(e)
+      raise ActiveResource::ResourceInvalid.new(self)
     end
 
     def blacklist

@@ -19,5 +19,9 @@ module Galaxy
     def self.recommend_deal(from, to_emails, deal_id, msg=nil)
       post(:recommend_deal, :from => from, :emails => to_emails, :deal_id => deal_id, :msg => msg)
     end
+
+    def self.forgot_password(email)
+      post(:forgot_password, :email => email)
+    end
   end
 end

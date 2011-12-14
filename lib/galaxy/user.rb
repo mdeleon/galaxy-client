@@ -14,6 +14,12 @@ module Galaxy
       find(:all, from: "/api/v2/users/find_by_email.json", params: {email: email})
     end
 
+    # @return [Galaxy::User]
+    #   Return the authenticated user
+    def self.authenticate(email, passwd)
+      new(get(:authenticate, email: email, pass: passwd), true)
+    end
+
     def reset_password
       put(:reset_password)
     end

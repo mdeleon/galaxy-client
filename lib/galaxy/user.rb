@@ -20,8 +20,8 @@ module Galaxy
       new(get(:authenticate, email: email, pass: passwd), true)
     end
 
-    def reset_password
-      put(:reset_password)
+    def reset_password(token, pass, pass_confirmation)
+      put(:reset_password, token: token, pass: pass, pass_confirmation: pass_confirmation)
     end
 
     def blacklist

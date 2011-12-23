@@ -92,8 +92,5 @@ module Galaxy
       @active_coupons ||= model_for(:coupon).find(:all, :from => "/#{self.class.path}/users/#{self.id}/coupons.json", :params => { :filter => "active" })
     end
 
-    def subscriptions
-      @subscriptions ||= Galaxy::Subscription.find(:all, :from => "/#{self.class.path}/users/#{self.id}/subscriptions.json")
-    end
   end
 end

@@ -18,6 +18,10 @@ module Galaxy
     #   Return the authenticated user
     def self.authenticate(email, passwd)
       new(get(:authenticate, email: email, pass: passwd), true)
+    rescue ActiveResource::ResourceInvalid => e
+      instance = new(email: email, pass: passwd)
+      instance.load_remote_errors(e)
+      raise ActiveResource::ResourceInvalid.new(instance)
     end
 
     def reset_password(token, pass, pass_confirmation)

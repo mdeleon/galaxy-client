@@ -6,8 +6,7 @@ module Galaxy
     #   If a user is passed, then the user's subscribed regions can be used as a source of secondary deals.
     # @return [Array]
     #   Returns an array of deal objects.  Does not include the current deal instance.
-    def secondary_deals(user=nil)
-      params = {}
+    def secondary_deals(user=nil, params={})
       user && params.merge(:user_id => user.id)
       get(:secondary_deals, params).map { |attrs| model_for(:deal).new(attrs) }
     end

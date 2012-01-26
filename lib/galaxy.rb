@@ -1,6 +1,8 @@
 require "active_resource"
 require "galaxy/version"
 require "galaxy/base"
+
+require "galaxy/address"
 require "galaxy/coupon"
 require "galaxy/credit_card"
 require "galaxy/category"

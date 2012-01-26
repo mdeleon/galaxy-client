@@ -21,7 +21,7 @@ module Galaxy
     def self.has_many(model)
       model = model.to_s
       eval(%Q[def #{model.pluralize}(params={})
-                @#{model.pluralize} ||= model_for(:#{model.singularize}).find(:all, :from => "/#{self.path}/#{self.to_s.underscore.pluralize}/\#{self.id}/#{model.pluralize}.json", :params => params)
+                @#{model.pluralize} ||= model_for(:#{model.singularize}).find(:all, :from => "/\#{self.class.path}/#{self.to_s.demodulize.underscore.pluralize}/\#{self.id}/#{model.pluralize}.json", :params => params)
               end
         ])
     end

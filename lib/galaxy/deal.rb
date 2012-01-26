@@ -21,10 +21,10 @@ module Galaxy
       @region ||= model_for(:region).find(self.region_id)
     end
 
-    def last_purchases(params={})
+    def purchases(params={})
       params ||= {}
       params.merge(:deal_id => self.id)
-      get(:last_purchases, params).map { |attrs| model_for(:purchase).new(attrs) }
+      get(:purchases, params).map { |attrs| model_for(:purchase).new(attrs) }
     end
 
     # Retrieves the merchant for a specific deal instance.

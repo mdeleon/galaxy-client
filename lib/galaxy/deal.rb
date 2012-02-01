@@ -47,6 +47,11 @@ module Galaxy
       Time.parse(super)
     end
 
+    # Parses the time String since JSON doesn't support time objects.
+    def expires_at
+      super && Time.parse(super)
+    end
+
     # Helper method to ensure custom_data returns a hash of attributes instead of a CustomData object.
     # @return [Hash]
     #   The hash corresponding to the custom data fields.

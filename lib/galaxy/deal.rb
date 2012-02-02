@@ -48,7 +48,7 @@ module Galaxy
     end
 
     # Parses the time String since JSON doesn't support time objects.
-    def expires_at
+    def expiry_as_of_now
       super && Time.parse(super)
     end
 

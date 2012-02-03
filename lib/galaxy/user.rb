@@ -1,7 +1,10 @@
 module Galaxy
   class User < Galaxy::Base
+    has_many :deals
+
     # lockdown schema if we want.
     # self.schema = {'name' => :string, 'age' => :integer, 'token' => :string }
+
 
     # @return [Galaxy::User]
     def self.find_by_token(token)

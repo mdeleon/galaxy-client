@@ -26,7 +26,7 @@ module Galaxy
         ])
     end
 
-    self.many_to_one(model)
+    def self.many_to_one(model)
       model = model.to_s.singularize
       eval(%Q[
         def #{model}(params={})

@@ -1,5 +1,7 @@
 module Galaxy
   class Purchase < Galaxy::Base
+    has_many :coupons
+
     def checkout
       put(:checkout)
     end

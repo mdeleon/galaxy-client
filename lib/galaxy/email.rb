@@ -2,6 +2,18 @@ module Galaxy
   # The Email resource is responsible for creating transactional emails through Galaxy.
   class Email < Galaxy::Base
 
+    def user
+      @user ||= model_for(:user).find(self.to_user_id)
+    end
+
+    def open
+      put :open
+    end
+
+    def click
+      put :click
+    end
+
     # Sends an invite email to multiple email address.
     # @param [Hash] params
     #   :user_id is the id of the user that we send the invitations on behalf of.

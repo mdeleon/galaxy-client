@@ -52,8 +52,8 @@ module Galaxy
       raise ActiveResource::ResourceInvalid.new(instance)
     end
 
-    def self.account_change(user_slug)
-      params = {user_slug: user_slug}
+    def self.account_change(user_id)
+      params = {user_id: user_id}
       post(:account_change, params)
     rescue ActiveResource::ResourceInvalid => e
       instance = new(params)

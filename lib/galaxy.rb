@@ -18,5 +18,6 @@ require "galaxy/region"
 require "galaxy/subscription"
 require "galaxy/user"
 require "galaxy/reset_token"
+require "galaxy/match"
 
 require "activeresource/validations"

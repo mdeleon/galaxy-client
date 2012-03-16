@@ -13,26 +13,38 @@ module Galaxy
 
     # TODO configure this
     # self.ssl_options
+    class << self
+      def create!(attributes = {})
+         self.new(attributes).tap { |resource| resource.save! }
+      end
 
-    def self.create!(attributes = {})
-       self.new(attributes).tap { |resource| resource.save! }
-    end
+      def has_many(model)
+        model = model.to_s.singularize
 
-    def self.has_many(model)
-      model = model.to_s
-      eval(%Q[def #{model.pluralize}(params={})
-                @#{model.pluralize} ||= model_for(:#{model.singularize}).find(:all, :from => "/\#{self.class.path}/#{self.to_s.demodulize.underscore.pluralize}/\#{self.id}/#{model.pluralize}.json", :params => params)
-              end
-        ])
-    end
+        class_eval <<-eoruby
+          def #{model.pluralize}(params={})
+            @#{model.pluralize} ||= model_for(:#{model}).find(
+              :all,
+              :from => "/\#{self.class.path}/#{self.to_s.demodulize.underscore.pluralize}/\#{self.id}/#{model.pluralize}.json",
+              :params => params)
+          end
+        eoruby
+      end
+      alias :one_to_many :has_many
 
-    def self.many_to_one(model)
-      model = model.to_s.singularize
-      eval(%Q[
-        def #{model}(params={})
-          @#{model} ||= model_for(:#{model}).find(:one, :from => "/\#{self.class.path}/#{model.pluralize}/\#{self.#{model}_id}.json", :params => params)
-        end 
-      ])
+      def belongs_to(model)
+        model = model.to_s.singularize
+
+        class_eval <<-eoruby
+          def #{model}(params={})
+            @#{model} ||= model_for(:#{model}).find(
+              :one,
+              :from => "/\#{self.class.path}/#{model.pluralize}/\#{self.#{model}_id}.json",
+              :params => params)
+          end
+        eoruby
+      end
+      alias :many_to_one :belongs_to
     end
   
     # This method takes a galaxy client model name and returns the corresponding model class

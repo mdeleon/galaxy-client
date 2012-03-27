@@ -51,5 +51,14 @@ module Galaxy
       instance.load_remote_errors(e)
       raise ActiveResource::ResourceInvalid.new(instance)
     end
+
+    def self.account_change(user_id)
+      params = {user_id: user_id}
+      post(:account_change, params)
+    rescue ActiveResource::ResourceInvalid => e
+      instance = new(params)
+      instance.load_remote_errors(e)
+      raise ActiveResource::ResourceInvaild.new(instance)
+    end
   end
 end

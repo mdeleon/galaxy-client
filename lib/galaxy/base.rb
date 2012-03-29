@@ -18,11 +18,13 @@ module Galaxy
        self.new(attributes).tap { |resource| resource.save! }
     end
 
-    def self.has_many(model)
-      model = model.to_s
-      eval(%Q[def #{model.pluralize}(params={})
-                @#{model.pluralize} ||= model_for(:#{model.singularize}).find(:all, :from => "/\#{self.class.path}/#{self.to_s.demodulize.underscore.pluralize}/\#{self.id}/#{model.pluralize}.json", :params => params)
-              end
+    def self.has_many(name, options={})
+      class_name = (options.delete(:class_name) || name).to_s.underscore
+      name = name.to_s
+      eval(%Q[
+        def #{name.pluralize}(params={})
+          @#{name.pluralize} ||= model_for(:#{class_name.singularize}).find(:all, :from => "/\#{self.class.path}/#{self.to_s.demodulize.underscore.pluralize}/\#{self.id}/#{class_name.pluralize}.json", :params => params)
+        end
         ])
     end
 

@@ -2,10 +2,6 @@ load File.join(File.dirname(__FILE__), "../sequences.rb")
 
 FactoryGirl.define do
   factory :deal, :class => Hoodwink::Models::Deal do
-    title
-    id   { title.to_s.slugify }
-    type { %w[daily-deal city-sampler private-reserve on-going hot-minute daily-deal].sample }
-    
     ignore do
       merchant { Factory(:merchant) }
       region   { Factory(:region)   }
@@ -13,6 +9,15 @@ FactoryGirl.define do
 
     merchant_name { merchant.name }
     merchant_id   { merchant.id   }
+
+    region_name { region.name }
+    region_id   { region.id   }
+    
+    title
+    id   { title.to_s.slugify }
+    type { %w[daily-deal city-sampler private-reserve on-going hot-minute daily-deal].sample }
+
+    product_name
     
     highlights         { FactoryGirl.generate(:short_lorem)   }
     description1       { FactoryGirl.generate(:long_lorem)    }
@@ -24,7 +29,7 @@ FactoryGirl.define do
     end_at
     time_left { end_at - Time.now }
     sold_out false
-    expires_at
+    expires_at     { FactoryGirl.generate(:far_future) }
     
     shipping_address_required false
     ended false
@@ -34,28 +39,26 @@ FactoryGirl.define do
     price          { FactoryGirl.generate(:dollar_amount) }
     value          { FactoryGirl.generate(:dollar_amount) }
     starting_price { FactoryGirl.generate(:dollar_amount) }
-    
-    # image => deal.image,
-    # image_url => deal.image("medium"),
 
-    region_name { region.name }
-    region_id   { region.id   }
+    image
+    image_url      { image.gsub("xlarge.jpg", "medium.jpg") }
 
-    # locations => deal.locations,
+    locations      { FactoryGirl.generate(:addresses) }
 
-    number_sold   { FactoryGirl.generate(:small_rand) }
-    num_left      { FactoryGirl.generate(:small_rand) }
-    num_available { FactoryGirl.generate(:big_rand)   }
-    tipping_point { FactoryGirl.generate(:small_rand) }
-    max_per_user  { FactoryGirl.generate(:small_rand) }
-    
-    #state => deal.workflow_state,
-    #custom_data => deal.data_mappings_with_name,
+    number_sold    { FactoryGirl.generate(:small_rand) }
+    num_left       { FactoryGirl.generate(:small_rand) }
+    num_available  { FactoryGirl.generate(:big_rand)   }
+    tipping_point  { FactoryGirl.generate(:small_rand) }
+    max_per_user   { FactoryGirl.generate(:small_rand) }
 
-    #instructions { FactoryGirl.generate(:long_lorem) }
-    #fulfillment_method => deal.fulfillment_method,
+    state "TODO: deal state"
 
-    expiry_as_of_now { expires_at }
+    custom_data   { FactoryGirl.generate(:long_lorem) }
+    instructions  { FactoryGirl.generate(:long_lorem) }
+
+    fulfillment_method "TODO: deal fulfillment_method"
+
+    expiry_as_of_now { FactoryGirl.generate(:far_future) }
   end
 end
 

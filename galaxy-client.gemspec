@@ -1,5 +1,3 @@
-# -*- encoding: utf-8 -*-
-
 require File.expand_path('../lib/galaxy/version', __FILE__)
 
 Gem::Specification.new do |s|
@@ -23,6 +21,9 @@ Gem::Specification.new do |s|
   s.add_development_dependency "yard"
   s.add_development_dependency "rdiscount"
   s.add_development_dependency "rdoc"
+
+  s.add_development_dependency "wrong"
+  s.add_development_dependency "guard-rspec"
 
   s.files        = `git ls-files`.split("\n")
   s.executables  = `git ls-files`.split("\n").select{|f| f =~ /^bin/}

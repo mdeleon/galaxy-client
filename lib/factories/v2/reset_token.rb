@@ -1,7 +1,7 @@
 load File.join(File.dirname(__FILE__), "../sequences.rb")
 
 FactoryGirl.define do
-  factory :coupon, :class => Hoodwink::Models::Coupon do
+  factory :reset_token, :class => Hoodwink::Models::ResetToken do
     ignore do
       user    { Factory(:user)    }
     end

@@ -4,6 +4,12 @@ FactoryGirl.define do
   factory :user, :class => Hoodwink::Models::User do
     email  { FactoryGirl.generate(:email) }
     postal_code       { Faker::Address.zip_code }
+    
+    ignore do
+      merchant { nil }
+    end
+
+    merchant_id { merchant && merchant.id || nil }    
 
     firstname     { Faker::Name.first_name }
     lastname      { Faker::Name.last_name }
@@ -12,7 +18,7 @@ FactoryGirl.define do
     share_link    { FactoryGirl.generate(:url) }
     token         { "TODO: user token" }
     num_purchased { rand(5) }
-    total_savings { FactoryGirl.generate(:price) }
+    total_savings { FactoryGirl.generate(:dollar_amount) }
     has_passwd    { FactoryGirl.generate(:boolean) }
     last_login_at { FactoryGirl.generate(:near_past) }
 

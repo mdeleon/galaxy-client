@@ -21,9 +21,8 @@ FactoryGirl.define do
   sequence(:far_past)      { (30 + rand(100)).days.ago }
   sequence(:far_future)    { (30 + rand(100)).days.from_now }
 
-  sequence(:start_at)      { Factory.generate(:near_past) }
-  sequence(:end_at)        { Factory.generate(:near_future) }
-  sequence(:expires_at)    { Factory.generate(:far_future) }
+  sequence(:start_at)      { FactoryGirl.generate(:near_past) }
+  sequence(:end_at)        { FactoryGirl.generate(:near_future) }
 
   sequence(:dollar_amount) { ((10 + rand) * 300).to_f }
 
@@ -50,6 +49,36 @@ FactoryGirl.define do
 
   sequence(:cc_type)       { %w[AMEX VISA MC DISCOVER DINERSCLUB].sample }
   sequence(:cc_number)     { 4.times.map{"%04d" % rand(9999)}.join("-") }
+
+  sequence(:image) do |i| 
+    images = %w[
+      ugassets/deal/images/0/0/0551d492/xlarge.jpg
+      ugassets/deal/images/0/0/1212b4f6/xlarge.jpg
+      ugassets/deal/images/0/0/137445bf/xlarge.jpg
+      ugassets/deal/images/0/0/1651ddc9/xlarge.jpg
+      ugassets/deal/images/0/0/170e8669/xlarge.jpg
+      ugassets/deal/images/0/0/17e508f8/xlarge.jpg
+      ugassets/deal/images/0/0/1870555b/xlarge.jpg
+      ugassets/deal/images/0/0/1a4d64af/xlarge.jpg
+      ugassets/deal/images/0/0/1ed6803d/xlarge.jpg
+      ugassets/deal/images/0/0/235062e3/xlarge.jpg
+      ugassets/deal/images/0/0/2a657ba8/xlarge.jpg
+      ugassets/deal/images/0/0/37a53376/xlarge.jpg
+      ugassets/deal/images/0/0/3dd60b24/xlarge.jpg
+      ugassets/deal/images/0/0/3fef676d/xlarge.jpg
+      ugassets/deal/images/0/0/5324defb/xlarge.jpg
+      ugassets/deal/images/0/0/6eff5d4e/xlarge.jpg
+      ugassets/deal/images/0/0/7991ebfa/xlarge.jpg
+      ugassets/deal/images/0/0/7a5a2da5/xlarge.jpg
+      ugassets/deal/images/0/0/80a4b330/xlarge.jpg
+      ugassets/deal/images/0/0/8561b323/xlarge.jpg
+      ugassets/deal/images/0/0/88d8d8d1/xlarge.jpg
+      ugassets/deal/images/0/0/8bf7381c/xlarge.jpg
+      ugassets/deal/images/0/0/8f0c5a93/xlarge.jpg
+      ugassets/deal/images/0/0/92d304f9/xlarge.jpg
+    ]
+    "http://d2x9dz1etb1m98.cloudfront.net/%s" % images[i % images.length]
+  end
 
 end if FactoryGirl.sequences.to_a.empty?
 

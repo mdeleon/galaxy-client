@@ -1,4 +1,4 @@
-load File.join(File.dirname(__FILE__), "../sequences.rb")
+load File.join(File.dirname(__FILE__), "../../sequences.rb")
 
 FactoryGirl.define do
   factory :daily_update, :class => Hoodwink::Models::DailyUpdate do

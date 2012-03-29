@@ -1,6 +1,15 @@
 require "rspec"
 require "galaxy"
 
+require 'factory_girl'
+require 'hoodwink'
+require 'faker'
+require 'wrong'
+include Wrong
+
+FactoryGirl.definition_file_paths = [File.join(File.dirname(__FILE__), '../lib/factories/v2')]
+FactoryGirl.find_definitions
+
 def perform_mock?
   !ENV["INTEGRATION"]
 end
@@ -29,3 +38,4 @@ end
 def post_headers(opts={})
   { "Authorization" => "Basic Zm9vOmJhcg==", "Content-Type" => "application/json" }.merge(opts)
 end
+

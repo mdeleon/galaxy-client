@@ -20,3 +20,7 @@ require "galaxy/user"
 require "galaxy/reset_token"
 
 require "activeresource/validations"
+
+module GalaxyClient
+  FACTORY_DIRS_V2 = [File.join(File.dirname(__FILE__), "factories/v2")]
+end

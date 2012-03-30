@@ -15,10 +15,10 @@ FactoryGirl.define do
     expires_at  { FactoryGirl.generate(:far_future) }
     redeemed_at { FactoryGirl.generate(:near_past) }
     created_at  { FactoryGirl.generate(:far_past) }
-    state       { Faker::Address.state }
+    state       { ["valid", "expired", "active"].sample }
     barcode     { "TODO: coupon barcode" }
-
-    id          { [purchase_id, deal_id, credit_card_id, state].slugify }
+    
+    id          { "%05i" % rand(10000) }
   end
 end
 

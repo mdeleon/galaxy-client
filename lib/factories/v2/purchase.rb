@@ -4,7 +4,7 @@ FactoryGirl.define do
   factory :purchase, :class => Hoodwink::Models::Purchase do
     ignore do
       deal        { Factory(:deal)        }
-      user    { Factory(:user)    }
+      user        { Factory(:user)    }
       credit_card { Factory(:credit_card) }
     end
 
@@ -17,9 +17,9 @@ FactoryGirl.define do
     
     credits     { rand(100) }
     price       { FactoryGirl.generate(:dollar_amount) }
-    state       { Faker::Address.state }
+    state       { "TODO: purchase state" }
 
-    id          { [purchase_id, deal_id, credit_card_id, state].slugify }
+    id          { [deal_id, credit_card_id, state].slugify }
   end
 end
 

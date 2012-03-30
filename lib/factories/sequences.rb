@@ -1,4 +1,5 @@
 require 'ext/string'
+require 'ext/array'
 
 # This file is loaded from factory files, and re-loaded on each
 # request. Protect from "double-define error". Maybe a global that is
@@ -13,8 +14,9 @@ FactoryGirl.define do
   sequence(:short_lorem)   { Faker::Lorem.sentence }
   sequence(:long_lorem)    { Faker::Lorem.paragraph }
 
-  sequence(:small_rand)    { 3 + rand(10) }
-  sequence(:big_rand)      { 10 + rand(500) }
+  sequence(:small_rand)    { 10 + rand(10) }
+  sequence(:medium_rand)   { 10 + rand(100) }
+  sequence(:big_rand)      { 10 + rand(1000) }
 
   sequence(:near_past)     { (5 + rand(24*5)).hours.ago }
   sequence(:near_future)   { (5 + rand(24*5)).hours.from_now }
@@ -24,15 +26,15 @@ FactoryGirl.define do
   sequence(:start_at)      { FactoryGirl.generate(:near_past) }
   sequence(:end_at)        { FactoryGirl.generate(:near_future) }
 
-  sequence(:dollar_amount) { ((10 + rand) * 300).to_f }
+  sequence(:dollar_amount) { ((5 + rand) * 30).to_f }
 
   sequence(:timezone)      { ActiveSupport::TimeZone::MAPPING.values.sample }
 
   sequence(:city)          { Faker::Address.city }
-  sequence(:title)         { Faker::Company.catch_phrase.titleize }
+  sequence(:title)         { Faker::Company.catch_phrase.titleize.gsub(/\//, "") }
 
-  sequence(:product_name)  { Faker::Company.bs.titleize }
-  sequence(:company_name)  { Faker::Company.name }
+  sequence(:product_name)  { Faker::Company.bs.titleize.gsub(/\//, "") }
+  sequence(:company_name)  { Faker::Company.name.gsub(/\//, "") }
 
   sequence(:url)           { Faker::Internet.url }
   sequence(:website)       { Faker::Internet.url }

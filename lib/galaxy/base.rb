@@ -19,22 +19,28 @@ module Galaxy
     end
 
     def self.has_many(name, options={})
-      class_name = (options.delete(:class_name) || name).to_s.underscore
-      name = name.to_s
-      eval(%Q[
+      name           = name.to_s
+      class_name     = (options.delete(:class_name) || name).to_s.underscore
+      resource_name  = (options.delete(:resource_name) || name).to_s.underscore
+      default_params = (options.delete(:default_params) || {})
+      method = %Q[
         def #{name.pluralize}(params={})
-          @#{name.pluralize} ||= model_for(:#{class_name.singularize}).find(:all, :from => "/\#{self.class.path}/#{self.to_s.demodulize.underscore.pluralize}/\#{self.id}/#{class_name.pluralize}.json", :params => params)
+          @_memo_cache ||= {}
+          @_memo_cache["#{name.pluralize}" + (params && params.sort.inspect)] ||= model_for(:#{class_name.singularize}).find(:all, :from => "/\#{self.class.path}/#{self.to_s.demodulize.underscore.pluralize}/\#{self.id}/#{resource_name.pluralize}.json", :params => params)
         end
-        ])
+      ]
+      class_eval method
     end
 
     def self.many_to_one(model)
       model = model.to_s.singularize
-      eval(%Q[
+      method = %Q[
         def #{model}(params={})
-          @#{model} ||= model_for(:#{model}).find(:one, :from => "/\#{self.class.path}/#{model.pluralize}/\#{self.#{model}_id}.json", :params => params)
+          @_memo_cache ||= {}
+          @_memo_cache["#{model}" + (params && params.sort.inspect)] ||= model_for(:#{model}).find(:one, :from => "/\#{self.class.path}/#{model.pluralize}/\#{self.#{model}_id}.json", :params => params)
         end 
-      ])
+      ]
+      class_eval method
     end
   
     # This method takes a galaxy client model name and returns the corresponding model class

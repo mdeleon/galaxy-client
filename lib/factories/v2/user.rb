@@ -2,8 +2,8 @@ load File.join(File.dirname(__FILE__), "../sequences.rb")
 
 FactoryGirl.define do
   factory :user, :class => Hoodwink::Models::User do
-    email  { FactoryGirl.generate(:email) }
-    postal_code       { Faker::Address.zip_code }
+    email       { FactoryGirl.generate(:email) }
+    postal_code { Faker::Address.zip_code }
     
     ignore do
       merchant { nil }
@@ -22,7 +22,7 @@ FactoryGirl.define do
     has_passwd    { FactoryGirl.generate(:boolean) }
     last_login_at { FactoryGirl.generate(:near_past) }
 
-    id          { [purchase_id, deal_id, credit_card_id, state].slugify }
+    id          { [email, postal_code, firstname, lastname].slugify }
   end
 end
 

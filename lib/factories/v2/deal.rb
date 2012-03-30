@@ -36,9 +36,9 @@ FactoryGirl.define do
 
     fine_print     { FactoryGirl.generate(:long_lorem)    }
     
-    price          { FactoryGirl.generate(:dollar_amount) }
     value          { FactoryGirl.generate(:dollar_amount) }
-    starting_price { FactoryGirl.generate(:dollar_amount) }
+    price          { value * 2 }
+    starting_price { value * 3 }
 
     image
     image_url      { image.gsub("xlarge.jpg", "medium.jpg") }
@@ -51,7 +51,7 @@ FactoryGirl.define do
     tipping_point  { FactoryGirl.generate(:small_rand) }
     max_per_user   { FactoryGirl.generate(:small_rand) }
 
-    state "TODO: deal state"
+    state "in_flight"
 
     custom_data   { FactoryGirl.generate(:long_lorem) }
     instructions  { FactoryGirl.generate(:long_lorem) }

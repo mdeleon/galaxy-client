@@ -43,6 +43,7 @@ FactoryGirl.define do
 
   sequence(:address)       { [:street_address, :city, :us_state_abbr, :zip].map{|s| Faker::Address.send(s)}.join(', ') }
   sequence(:addresses)     { (0..rand(5)).map{ FactoryGirl.generate(:address) } } 
+  sequence(:cities)       { (0..rand(5)).map{ FactoryGirl.generate(:city) } } 
 
   sequence(:phone_number)  { Faker::PhoneNumber.phone_number }
   sequence(:phone_numbers) { (0..rand(5)).map{ FactoryGirl.generate(:phone_number) } } 

@@ -43,7 +43,7 @@ FactoryGirl.define do
     image
     image_url      { image.gsub("xlarge.jpg", "medium.jpg") }
 
-    locations      { FactoryGirl.generate(:addresses) }
+    locations      { FactoryGirl.generate(:cities) }
 
     number_sold    { FactoryGirl.generate(:small_rand) }
     num_left       { FactoryGirl.generate(:small_rand) }

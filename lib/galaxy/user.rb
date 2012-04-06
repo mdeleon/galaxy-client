@@ -27,6 +27,16 @@ module Galaxy
       raise ActiveResource::ResourceInvalid.new(instance)
     end
 
+    # @return [Galaxy::User]
+    #   Return the authenticated user
+    def self.authenticate_external_admin(email, passwd)
+      new(get(:authenticate_external_admin, email: email, pass: passwd), true)
+    rescue ActiveResource::ResourceInvalid => e
+      instance = new(email: email, pass: passwd)
+      instance.load_remote_errors(e)
+      raise ActiveResource::ResourceInvalid.new(instance)
+    end
+
     def reset_password(token, pass, pass_confirmation)
       params = { token: token, pass: pass, pass_confirmation: pass_confirmation }
       put(:reset_password, params)

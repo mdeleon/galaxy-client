@@ -7,5 +7,9 @@ module Galaxy
     def deals(filter={})
       @deals ||= model_for(:deal).find(:all, :from => "/api/v2/regions/#{self.id}/deals.json", :params => filter)
     end
+
+    def self.from_ip(ip)
+      model_for(:region).new(get(:from_ip))
+    end
   end
 end

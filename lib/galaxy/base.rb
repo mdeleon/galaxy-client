@@ -43,7 +43,7 @@ module Galaxy
     # Otherwise, Galaxy::User class is returned.  If Galaxy::User cannot be found either, a NameError exception
     # will be raised.
 
-    def self.model_for(class_name)
+    def model_for(class_name)
       name = class_name.to_s.split('::').last.camelize
       galaxy_model_class = "Galaxy::#{name}".constantize
       # use derived model class if we can find one

@@ -17,6 +17,15 @@ module Galaxy
       find(:all, from: "/api/v2/users/find_by_email.json", params: {email: email})
     end
 
+    def self.find_by_password_reset_token(token)
+      find(:one, from: "/api/v2/users/find_by_password_reset_token.json", params: {reset_token_id: token})
+    end
+
+    # TODO: this method is a code smell -- auth should happen some other way
+    def self.find_external_admin_by_email(email)
+      find(:all, from: "/api/v2/users/find_external_admin_by_email.json", params: {email: email})
+    end
+
     # @return [Galaxy::User]
     #   Return the authenticated user
     def self.authenticate(email, passwd)
@@ -37,6 +46,14 @@ module Galaxy
       raise ActiveResource::ResourceInvalid.new(instance)
     end
 
+    def forgot_password(partner_interface_domain)
+      params = {:partner_interface_domain => "merchant"}
+      put(:forgot_password, params)
+    rescue ActiveResource::ResourceInvalid => e
+      load_remote_errors(e)
+      raise ActiveResource::ResourceInvalid.new(self)
+    end
+    
     def reset_password(token, pass, pass_confirmation)
       params = { token: token, pass: pass, pass_confirmation: pass_confirmation }
       put(:reset_password, params)

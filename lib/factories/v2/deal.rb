@@ -5,6 +5,7 @@ FactoryGirl.define do
     ignore do
       merchant { Factory(:merchant) }
       region   { Factory(:region)   }
+      location { Factory(:location)   }
     end
 
     merchant_name { merchant.name }

@@ -28,4 +28,19 @@ describe Galaxy::Region do
       response.first.id.should ==  "d9c3k19d"
     end
   end
+
+  describe "#from_ip" do
+    let(:region_json) {"{\"active\":true,\"slug\":\"san-francisco\",\"name\":\"San Francisco\",\"id\":\"san-francisco\"}"}
+
+    it "sends GET to /regions/from_ip.json" do
+      mock_galaxy(:get, "/api/v2/regions/from_ip.json?ip=127.0.0.1", get_headers, region_json, 200)
+      response = Galaxy::Region.from_ip('127.0.0.1')
+    end
+
+    it "parses json into a region object" do
+      response = Galaxy::Region.from_ip('127.0.0.1')
+      response.should be_instance_of(Galaxy::Region)
+      response.id.should ==  "san-francisco"
+    end
+  end
 end

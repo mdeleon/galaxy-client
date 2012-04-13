@@ -51,5 +51,14 @@ module Galaxy
       rescue NameError => e
         galaxy_model_class || raise(e)
     end
+
+    def self.model_for
+      name = to_s.split('::').last.camelize
+      galaxy_model_class = self
+      # use derived model class if we can find one
+      (c = "::#{name}".constantize) && c < galaxy_model_class && c || galaxy_model_class
+      rescue NameError => e
+        galaxy_model_class || raise(e)
+    end
   end
 end

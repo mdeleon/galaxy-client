@@ -9,7 +9,7 @@ module Galaxy
     end
 
     def self.from_ip(ip)
-      model_for.new(get(:from_ip, :ip => ip))
+      model_for.new(get(:from_ip, :ip => ip), true)
     end
   end
 end

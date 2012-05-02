@@ -4,7 +4,6 @@ require "galaxy/card_link"
 describe Galaxy::CardLink do
   let(:cardlink_id) { "d9c3k19d" }
   let(:cardlinks) { [{ :id => cardlink_id }] }
-  let(:cardlink)  { Galaxy::CardLink.new(:id => cardlink_id) }
 
   describe "#link" do
     it "sends GET to /card_links/:id/link.json" do

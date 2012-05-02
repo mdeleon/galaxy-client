@@ -24,8 +24,8 @@ describe Galaxy::User do
   describe "#reset_password" do
     it "sends PUT to /users/:id/reset_password.json" do
       user = Galaxy::User.new(:id => "d02k49d")
-      mock_galaxy(:put, "/api/v2/users/#{user.id}/reset_password.json", post_headers, nil, 200)
-      user.reset_password
+      mock_galaxy(:put, "/api/v2/users/d02k49d/reset_password.json?pass=password&pass_confirmation=password&token=token", post_headers, nil, 200)
+      user.reset_password("token", "password", "password")
     end
   end
 

@@ -3,8 +3,9 @@ require "galaxy/user"
 
 describe Galaxy::User do
   before(:all) do
-    @user_hash  = {id: "ABC123", email: "test@test.com", postal_code: "94110", firstname: "foo", credits: 0, share_link: "whatevers"}
-    @users_ary  = {:users => [@user_hash]}
+    @user_hash  = { id: "ABC123", email: "test@test.com", postal_code: "94110", firstname: "foo", credits: 0, share_link: "whatevers" }
+    @users_ary  = { :users => [@user_hash] }
+    @http_ok    = { :status => 'success' }
   end
 
   describe ".find_by_token" do
@@ -24,16 +25,18 @@ describe Galaxy::User do
   describe "#reset_password" do
     it "sends PUT to /users/:id/reset_password.json" do
       user = Galaxy::User.new(:id => "d02k49d")
-      mock_galaxy(:put, "/api/v2/users/d02k49d/reset_password.json?pass=password&pass_confirmation=password&token=token", post_headers, nil, 200)
-      user.reset_password("token", "password", "password")
+      mock_galaxy(:put, "/api/v2/users/d02k49d/reset_password.json?pass=password&pass_confirmation=password&token=token", post_headers, @http_ok, 200)
+      response = user.reset_password("token", "password", "password")
+      response.body[:status] == 'success'
     end
   end
 
   describe "#blacklist" do
     it "sends PUT to /users/:id/blacklist.json" do
       user = Galaxy::User.new(:id => "d02k49d")
-      mock_galaxy(:put, "/api/v2/users/#{user.id}/blacklist.json", post_headers, nil, 200)
-      user.blacklist
+      mock_galaxy(:put, "/api/v2/users/#{user.id}/blacklist.json", post_headers, @http_ok, 200)
+      response = user.blacklist
+      response.body[:status] == 'success'
     end
   end
 end

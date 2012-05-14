@@ -29,3 +29,7 @@ end
 def post_headers(opts={})
   { "Authorization" => "Basic Zm9vOmJhcg==", "Content-Type" => "application/json" }.merge(opts)
 end
+
+def delete_headers(opts={})
+  get_headers
+end

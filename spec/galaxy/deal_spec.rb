@@ -2,6 +2,14 @@ require File.expand_path('../../spec_helper', __FILE__)
 require "galaxy/deal"
 
 describe Galaxy::Deal do
+  subject {
+    Galaxy::Deal.new :start_at => nil,
+    :end_at => nil,
+    :expiry_as_of_now => nil
+  }
+
+  it_timeifies :start_at, :end_at, :expiry_as_of_now
+
   describe "#secondary_deals" do
     it "sends GET to /deals/:id/secondary_deals.json" do
       secondary_deals = [{ :id => "some deal" }]

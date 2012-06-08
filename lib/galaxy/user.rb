@@ -1,6 +1,7 @@
 module Galaxy
   class User < Galaxy::Base
     has_many :deals
+    has_many :matches
 
     # lockdown schema if we want.
     # self.schema = {'name' => :string, 'age' => :integer, 'token' => :string }
@@ -99,5 +100,24 @@ module Galaxy
       @active_coupons ||= model_for(:coupon).find(:all, :from => "/#{self.class.path}/users/#{self.id}/coupons.json", :params => { :filter => "active" })
     end
 
+    
   end
 end
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

@@ -7,11 +7,11 @@ module Galaxy
     end
 
     def link
-      put :link
+      model_for(:card_link).new(JSON.parse(put(:link).body))
     end
 
     def unlink
-      put :unlink
+      model_for(:card_link).new(JSON.parse(put(:unlink).body))
     end
   end
 end

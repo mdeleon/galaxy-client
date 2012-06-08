@@ -1,5 +1,6 @@
 require "active_resource"
 require "galaxy/version"
+require "galaxy/timeify"
 require "galaxy/base"
 
 require "galaxy/address"

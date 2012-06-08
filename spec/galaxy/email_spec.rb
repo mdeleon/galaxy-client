@@ -10,9 +10,17 @@ describe Galaxy::Email do
   end
 
   describe ".recommend_deal" do
+    let(:params) {
+      {
+        :user_id => "foo@example.com",
+        :emails => ["bar1@example.com", "bar2@example.com"],
+        :deal_id => "the-big-deal",
+        :message => "Hello World!"
+      }
+    }
     it "sends POST to /emails/recommend_deal.json with params" do
-      mock_galaxy(:post, "/api/v2/emails/recommend_deal.json?deal_id=the-big-deal&emails%5B%5D=bar1%40example.com&emails%5B%5D=bar2%40example.com&from=foo%40example.com&msg=Hello+World%21", post_headers, nil, 200)
-      Galaxy::Email.recommend_deal("foo@example.com", ["bar1@example.com", "bar2@example.com"], "the-big-deal", "Hello World!")
+      Galaxy::Email.should_receive(:post).with(:recommend_deal, params)
+      Galaxy::Email.recommend_deal(params)
     end
   end
 end

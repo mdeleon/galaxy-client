@@ -44,7 +44,6 @@ PLATFORMS
   ruby
 
 DEPENDENCIES
-  bundler (~> 1.0.0)
   galaxy-client!
   rdiscount
   rdoc

@@ -11,9 +11,11 @@ def mock_galaxy(action, path, request_headers = {}, body = nil, status = 200, re
     mock.send action, path, request_headers, body, status, response_headers
   end
 end
+Dir[File.join(File.dirname(__FILE__), "support/**/*.rb")].each {|f| require f}
 
 RSpec.configure do |c|
   c.mock_with :rspec
+  c.extend Macros::System
 
   c.before(:suite) do
     Galaxy::Base.user      = "foo"

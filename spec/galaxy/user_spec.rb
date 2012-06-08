@@ -21,6 +21,13 @@ describe Galaxy::User do
   end
 
   describe "#reset_password" do
+    let(:params) {
+      {
+        token: 'token',
+        pass: 'password',
+        pass_confirmation: "password confirmation"
+      }
+    }
     it "sends PUT to /users/:id/reset_password.json" do
       user = Galaxy::User.new(:id => "d02k49d")
       mock_galaxy(:put, "/api/v2/users/d02k49d/reset_password.json?pass=password&pass_confirmation=password&token=token", post_headers, http_ok, 200)

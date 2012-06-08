@@ -1,5 +1,8 @@
 module Galaxy
   class Deal < Galaxy::Base
+    extend Timeify
+
+    timeify :start_at, :end_at, :expiry_as_of_now
 
     # Retrieves the secondary deals for a specific deal instance.  By default, this will retrieve other deals from the same region and national.
     # @param [User]
@@ -34,21 +37,6 @@ module Galaxy
     def merchant
       # TODO: modify for eager loading of objects...
       @merchant ||= model_for(:merchant).find(self.merchant_id)
-    end
-
-    # Parses the time String since JSON doesn't support time objects.
-    def start_at
-      Time.parse(super)
-    end
-
-    # Parses the time String since JSON doesn't support time objects.
-    def end_at
-      Time.parse(super)
-    end
-
-    # Parses the time String since JSON doesn't support time objects.
-    def expiry_as_of_now
-      super && Time.parse(super)
     end
 
     # Helper method to ensure custom_data returns a hash of attributes instead of a CustomData object.

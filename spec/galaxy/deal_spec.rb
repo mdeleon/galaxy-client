@@ -7,7 +7,9 @@ describe Galaxy::Deal do
     :end_at => nil,
     :expiry_as_of_now => nil
   }
+
   it_timeifies :start_at, :end_at, :expiry_as_of_now
+
   describe "#secondary_deals" do
     it "sends GET to /deals/:id/secondary_deals.json" do
       secondary_deals = [{ :id => "some deal" }]

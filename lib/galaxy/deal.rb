@@ -4,6 +4,8 @@ module Galaxy
 
     timeify :start_at, :end_at, :expiry_as_of_now
 
+    has_many :locations
+
     # Retrieves the secondary deals for a specific deal instance.  By default, this will retrieve other deals from the same region and national.
     # @param [User]
     #   If a user is passed, then the user's subscribed regions can be used as a source of secondary deals.
@@ -56,15 +58,5 @@ module Galaxy
       discount.to_f/value.to_f*100
     end
 
-    # has_many :locations doesn't work, explicitly defined here
-    #
-    # Retrieves the locations for a specific deal instance.
-    # The locations will be memoized.
-    # @example
-    #   deal.locations # => does network request
-    #   deal.locations # => returns locations from original request (no request)
-    def locations(params={})
-      @locations ||= model_for(:location).find(:all, :from => "/#{self.class.path}/deals/#{self.id}/locations.json", :params => params)
-    end
   end
 end

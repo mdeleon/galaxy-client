@@ -22,4 +22,17 @@ describe Galaxy::Deal do
       response.first.id.should == "some deal"
     end
   end
+
+  describe "#locations" do
+    it "sends GET to /deals/:id/locations.json" do
+      locations = [{ :id => "some location" }]
+      deal = Galaxy::Deal.new(:id => "d02k49d")
+      mock_galaxy(:get, "/api/v2/deals/#{deal.id}/locations.json", get_headers, { :locations => locations }.to_json, 200)
+
+      response = deal.locations
+      response.should be_instance_of(Array)
+      response.first.should be_instance_of(Galaxy::Location)
+      response.first.id.should == "some location"
+    end
+  end
 end

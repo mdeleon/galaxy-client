@@ -55,5 +55,16 @@ module Galaxy
     def discount_percentage
       discount.to_f/value.to_f*100
     end
+
+    # has_many :locations doesn't work, explicitly defined here
+    #
+    # Retrieves the locations for a specific deal instance.
+    # The locations will be memoized.
+    # @example
+    #   deal.locations # => does network request
+    #   deal.locations # => returns locations from original request (no request)
+    def locations(params={})
+      @locations ||= model_for(:location).find(:all, :from => "/#{self.class.path}/deals/#{self.id}/locations.json", :params => params)
+    end
   end
 end

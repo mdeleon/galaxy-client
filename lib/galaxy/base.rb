@@ -28,7 +28,7 @@ module Galaxy
 
     def self.many_to_one(model)
       model = model.to_s.singularize
-      eval(%Q[
+      class_eval(%Q[
         def #{model}(params={})
           @#{model} ||= model_for(:#{model}).find(:one, :from => "/\#{self.class.path}/#{model.pluralize}/\#{self.#{model}_id}.json", :params => params)
         end

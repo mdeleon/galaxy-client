@@ -20,7 +20,7 @@ module Galaxy
 
     def self.has_many(model)
       model = model.to_s
-      eval(%Q[def #{model.pluralize}(params={})
+      class_eval(%Q[def #{model.pluralize}(params={})
                 @#{model.pluralize} ||= model_for(:#{model.singularize}).find(:all, :from => "/\#{self.class.path}/#{self.to_s.demodulize.underscore.pluralize}/\#{self.id}/#{model.pluralize}.json", :params => params)
               end
         ])
@@ -28,13 +28,13 @@ module Galaxy
 
     def self.many_to_one(model)
       model = model.to_s.singularize
-      eval(%Q[
+      class_eval(%Q[
         def #{model}(params={})
           @#{model} ||= model_for(:#{model}).find(:one, :from => "/\#{self.class.path}/#{model.pluralize}/\#{self.#{model}_id}.json", :params => params)
-        end 
+        end
       ])
     end
-  
+
     # This method takes a galaxy client model name and returns the corresponding model class
     # The returned model class is either a model class defined by the application (which is derived from
     # Galaxy client's class), or the Galaxy client's class itself.  For example, model_for(:user)

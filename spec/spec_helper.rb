@@ -21,6 +21,7 @@ RSpec.configure do |c|
     Galaxy::Base.user      = "foo"
     Galaxy::Base.password  = "bar"
     Galaxy::Base.site      = "https://partner.offerengine.com/api/v2/?"
+    Galaxy::Base.path      = "api/v2"
   end
 end
 

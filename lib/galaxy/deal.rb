@@ -4,6 +4,8 @@ module Galaxy
 
     timeify :start_at, :end_at, :expiry_as_of_now
 
+    has_many :locations
+
     # Retrieves the secondary deals for a specific deal instance.  By default, this will retrieve other deals from the same region and national.
     # @param [User]
     #   If a user is passed, then the user's subscribed regions can be used as a source of secondary deals.
@@ -55,5 +57,6 @@ module Galaxy
     def discount_percentage
       discount.to_f/value.to_f*100
     end
+
   end
 end

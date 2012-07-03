@@ -1,13 +1,7 @@
 module Galaxy
   class Coupon < Galaxy::Base
     def redeem(params={})
-      begin
-        put(:redeem, params)
-      rescue ActiveResource::ResourceInvalid => e
-        instance = self.class.new(params)
-        instance.load_remote_errors(e)
-        raise ActiveResource::ResourceInvalid.new(instance)
-      end
+      put(:redeem, params)
     end
 
     def deal

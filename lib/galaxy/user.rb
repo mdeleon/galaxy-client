@@ -22,18 +22,11 @@ module Galaxy
     #   Return the authenticated user
     def self.authenticate(email, passwd)
       new(get(:authenticate, email: email, pass: passwd), true)
-    rescue ActiveResource::ResourceInvalid => e
-      instance = new(email: email, pass: passwd)
-      instance.load_remote_errors(e)
-      raise ActiveResource::ResourceInvalid.new(instance)
     end
 
     def reset_password(token, pass, pass_confirmation)
       params = { token: token, pass: pass, pass_confirmation: pass_confirmation }
       put(:reset_password, params)
-    rescue ActiveResource::ResourceInvalid => e
-      load_remote_errors(e)
-      raise ActiveResource::ResourceInvalid.new(self)
     end
 
     def blacklist
@@ -100,7 +93,7 @@ module Galaxy
       @active_coupons ||= model_for(:coupon).find(:all, :from => "/#{self.class.path}/users/#{self.id}/coupons.json", :params => { :filter => "active" })
     end
 
-    
+
   end
 end
 

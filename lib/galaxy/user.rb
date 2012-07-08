@@ -7,6 +7,17 @@ module Galaxy
     # self.schema = {'name' => :string, 'age' => :integer, 'token' => :string }
 
 
+    class << self
+      def find_external_admin_by_email(email)
+        begin
+          get(:find_external_admin_by_email, :email => email).map do |json|
+            new json
+          end
+        rescue ActiveResource::ResourceNotFound
+          []
+        end
+      end
+    end
     # @return [Galaxy::User]
     def self.find_by_token(token)
       find(:all, from: "/api/v2/users/find_by_token.json", params: {token: token})

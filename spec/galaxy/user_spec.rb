@@ -6,6 +6,25 @@ describe Galaxy::User do
   let(:users_ary) { { :users => [user_hash] } }
   let(:http_ok)   { { :status => 'success' } }
 
+  describe ".find_external_admin_by_email" do
+    let(:user) { double :user }
+    let(:result) { Galaxy::User.find_external_admin_by_email("e@example.com").first }
+    it "gets the /users/find_external_admin_by_email.json" do
+      Galaxy::User.should_receive(:get).with(
+        :find_external_admin_by_email,
+        :email => "e@example.com"
+      ).and_return [ {:attr => "val"} ]
+      result.attr.should eq("val")
+    end
+
+    context "when a ResourceNotFound is raised" do
+      it "returns an empty array" do
+        Galaxy::User.stub(:get).and_raise(ActiveResource::ResourceNotFound.new(user))
+        Galaxy::User.find_external_admin_by_email("e@example.com").should be_empty
+      end
+    end
+  end
+
   describe ".find_by_token" do
     it "sends GET to /users/find_by_token.json" do
       mock_galaxy(:get, "/api/v2/users/find_by_token.json?token=123", get_headers, users_ary.to_json, 200)
@@ -23,10 +42,10 @@ describe Galaxy::User do
   describe "#reset_password" do
     let(:params) {
       {
-        token: 'token',
-        pass: 'password',
-        pass_confirmation: "password confirmation"
-      }
+      token: 'token',
+      pass: 'password',
+      pass_confirmation: "password confirmation"
+    }
     }
     it "sends PUT to /users/:id/reset_password.json" do
       user = Galaxy::User.new(:id => "d02k49d")

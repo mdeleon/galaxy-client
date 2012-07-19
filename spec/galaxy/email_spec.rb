@@ -2,6 +2,8 @@ require File.expand_path('../../spec_helper', __FILE__)
 require "galaxy/email"
 
 describe Galaxy::Email do
+  let(:http_ok)   { { :status => 'success' } }
+
   describe ".invite" do
     it "sends POST to /emails/invite.json with params" do
       mock_galaxy(:post, "/api/v2/emails/invite.json?emails%5B%5D=bar1%40example.com&emails%5B%5D=bar2%40example.com&message=Hello+World%21&user_id=d92kd030", post_headers, nil, 200)
@@ -30,4 +32,14 @@ describe Galaxy::Email do
       })
     end
   end
+
+  describe "#unsubscribe" do
+    it "sends PUT to /emails/:id/unsubscribe.json" do
+      email = Galaxy::Email.new(:id => "d02k49d")
+      mock_galaxy(:put, "/api/v2/emails/#{email.id}/unsubscribe.json", post_headers, http_ok, 200)
+      response = email.unsubscribe
+      response.body[:status] == 'success'
+    end
+  end
+
 end

@@ -21,5 +21,6 @@ require "galaxy/user"
 require "galaxy/reset_token"
 require "galaxy/merchants/deal_summary"
 require "galaxy/match"
+require "galaxy/promotion"
 
 require "activeresource/validations"

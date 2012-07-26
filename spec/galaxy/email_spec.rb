@@ -38,7 +38,7 @@ describe Galaxy::Email do
       email = Galaxy::Email.new(:id => "d02k49d")
       mock_galaxy(:put, "/api/v2/emails/#{email.id}/unsubscribe.json", post_headers, http_ok, 200)
       response = email.unsubscribe
-      response.body[:status] == 'success'
+      response.body[:status].should eq('success')
     end
   end
 

@@ -10,6 +10,18 @@ module Galaxy
       end
     end
 
+    def phone
+      @phone ||= purchase.phone
+    end
+
+    def address
+      @address ||= purchase.location
+    end
+
+    def purchase
+      @purchase ||= model_for(:purchase).find(self.purchase_id)
+    end
+
     def deal
       @deal ||= model_for(:deal).find(self.deal_id)
     end

@@ -5,6 +5,10 @@ describe Galaxy::User do
   let(:user_hash) { { id: "ABC123", email: "test@test.com", postal_code: "94110", firstname: "foo", credits: 0, share_link: "whatevers" } }
   let(:users_ary) { { :users => [user_hash] } }
   let(:http_ok)   { { :status => 'success' } }
+  
+  subject { Galaxy::User.new :created_at => nil, :last_login_at => nil }
+  
+  it_timeifies :created_at, :last_login_at
 
   describe ".find_external_admin_by_email" do
     let(:user) { double :user }

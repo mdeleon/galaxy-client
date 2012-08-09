@@ -4,6 +4,7 @@ module Galaxy
   # The Galaxy::Base class inherits from ActiveResource::Base and acts as the central class to store common settings for all Galaxy models.
   # Currently all Galaxy models inherit from Base.
   class Base < ActiveResource::Base
+    extend Timeify
 
     cattr_accessor :version
     cattr_accessor :path

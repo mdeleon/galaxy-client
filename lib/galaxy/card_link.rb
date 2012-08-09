@@ -1,5 +1,7 @@
 module Galaxy
   class CardLink < Galaxy::Base
+    timeify :created_at, :fulfilled_at
+    
     many_to_one :deal
 
     def self.linked(deal_id, user_id)

@@ -5,10 +5,11 @@ describe Galaxy::Deal do
   subject {
     Galaxy::Deal.new :start_at => nil,
     :end_at => nil,
-    :expiry_as_of_now => nil
+    :expiry_as_of_now => nil,
+    :expires_at => nil
   }
 
-  it_timeifies :start_at, :end_at, :expiry_as_of_now
+  it_timeifies :start_at, :end_at, :expiry_as_of_now, :expires_at
 
   describe "#secondary_deals" do
     it "sends GET to /deals/:id/secondary_deals.json" do

@@ -56,7 +56,9 @@ module Galaxy
       discount.to_f/value.to_f*100
     end
     
-    
-
+    #Helper method
+    def timezone
+      region.timezone
+    end    
   end
 end

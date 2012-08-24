@@ -59,6 +59,11 @@ module Galaxy
     #Helper method
     def timezone
       region.timezone
-    end    
+    end  
+
+    # Helper method
+    def is_national?
+      region.slug == 'united-states'
+    end  
   end
 end

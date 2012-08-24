@@ -43,5 +43,10 @@ describe Galaxy::Deal do
       subject.stub_chain(:region, :id).and_return("united-states")
       subject.should be_national
     end
+
+    it "returns false if the deal's region is not 'united-states'" do
+      subject.stub_chain(:region, :id).and_return("xyc")
+      subject.should_not be_national
+    end
   end
 end

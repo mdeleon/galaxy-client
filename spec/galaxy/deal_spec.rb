@@ -6,7 +6,8 @@ describe Galaxy::Deal do
     Galaxy::Deal.new :start_at => nil,
     :end_at => nil,
     :expiry_as_of_now => nil,
-    :expires_at => nil
+    :expires_at => nil,
+    :region => nil
   }
 
   it_timeifies :start_at, :end_at, :expiry_as_of_now, :expires_at
@@ -34,6 +35,18 @@ describe Galaxy::Deal do
       response.should be_instance_of(Array)
       response.first.should be_instance_of(Galaxy::Location)
       response.first.id.should == "some location"
+    end
+  end
+
+  describe "#national?" do
+    it "returns true if the deal's region is 'united-states'" do
+      subject.stub_chain(:region, :id).and_return("united-states")
+      subject.should be_national
+    end
+
+    it "returns false if the deal's region is not 'united-states'" do
+      subject.stub_chain(:region, :id).and_return("xyc")
+      subject.should_not be_national
     end
   end
 end

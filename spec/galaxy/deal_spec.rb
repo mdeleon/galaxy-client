@@ -41,7 +41,7 @@ describe Galaxy::Deal do
   describe "#national?" do
     it "returns true if the deal's region is 'united-states'" do
       subject.stub_chain(:region, :id).and_return("united-states")
-      subject.national?.should eq true
+      subject.should be_national
     end
   end
 end

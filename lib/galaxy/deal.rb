@@ -63,7 +63,7 @@ module Galaxy
 
     # Helper method
     def is_national?
-      region.slug == 'united-states'
+      region.id == 'united-states'
     end  
   end
 end

@@ -4,6 +4,38 @@ module Galaxy
       model_for(:deal).new(get(:current_deal))
     end
 
+    alias_method :selectable?, :selectable
+    def selectable
+      # region has to be active in order to be selectable.
+      active? && !!(super)
+    end
+
+    def self.selectable_regions
+      find(:all).select{|r| r.selectable?}
+    end
+
+
+    def national?
+      id == 'united-states'
+    end
+
+    def nation_region_id
+      "united-states"
+    end
+
+
+    def national
+      Region.find("united-states")
+    end
+
+    def all
+      super.select { |r| r.selectable? }
+    end
+
+    def active?
+      !!(active)
+    end
+
     def deals(filter={})
       @deals ||= model_for(:deal).find(:all, :from => "/api/v2/regions/#{self.id}/deals.json", :params => filter)
     end

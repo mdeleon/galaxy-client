@@ -63,6 +63,10 @@ module Galaxy
       get(:administered_merchants)
     end
 
+    def num_already_purchased(deal)
+      active_purchases.map { |x| x.deal_id == deal.id ? x.num_bought : 0}.reduce(&:+) || 0
+    end
+
     # @return [Array]
     #   Returns all purchases for the user instance.
     # The purchases will be memoized.

@@ -37,7 +37,14 @@ module Galaxy
     end
 
     def deals(filter={})
-      @deals ||= model_for(:deal).find(:all, :from => "/api/v2/regions/#{self.id}/deals.json", :params => filter)
+      @deals ||= if self.respond_to(:deals)
+        self.deals.map{ |x| model_for(:deal).new(x) }
+      else
+        model_for(:deal).find(
+          :all, :from => "/api/v2/regions/#{self.id}/deals.json",
+          :params => params
+          )
+      end
     end
 
     def self.from_ip(ip)

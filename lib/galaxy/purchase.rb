@@ -9,11 +9,19 @@ module Galaxy
     end
 
     def deal
-      @deal ||= model_for(:deal).find(self.deal_id)
+      @deal ||= if self.respond_to?(:deal)
+        model_for(:deal).find(self.deal_id)
+      else
+        model_for(:deal).new(self.deal)
+      end
     end
 
     def credit_card
-      @credit_card ||= model_for(:credit_card).find(self.credit_card_id)
+      @credit_card ||= if self.respond_to?(:credit_card)
+        model_for(:credit_card).find(self.credit_card_id)
+      else
+        model_for(:credit_card).new(self.credit_card)
+      end
     end
 
     def charged?

@@ -4,36 +4,34 @@ module Galaxy
 
     timeify :start_at, :end_at, :expiry_as_of_now
 
-    alias :starting_price, :price
-    alias :product_name, :title
-    alias :show_map?, :show_map
-    alias :hide_addresses?, :hide_addresses
+    alias :starting_price :price
+    alias :product_name :title
+    alias :show_map? :show_map
+    alias :hide_addresses? :hide_addresses
 
-
-    def locations(params={})
+    #locations, merchant, region typically to be included with deal eager load (all) so we add some memoization
+    # => to check for their attributes and can sometimes save another api call
+    def locations
       @locations ||= if self.respond_to(:locations)
         self.locations.map{ |x| model_for(:location).new(x) }
       else
-        model_for(:location).find(
-          :all, :from => "/#{self.class.path}/deals/#{self.id}/locations.json",
-          :params => params
-          )
+        model_for(:location).find(:all, :from => "/api/v2/#{self.class.path}/deals/#{self.id}/locations.json")
       end
     end
 
     def merchant
       @merchant ||= if self.respond_to?(:merchant)
-        model_for(:merchant).find(self.merchant_id)
-      else
         model_for(:merchant).new(self.merchant)
+      else
+        model_for(:merchant).find(self.merchant_id)
       end
     end
 
     def region
       @region ||= if self.respond_to?(:region)
-        model_for(:region).find(self.region_id)
-      else
         model_for(:region).new(self.region)
+      else
+        model_for(:region).find(self.region_id)
       end
     end
 
@@ -43,9 +41,11 @@ module Galaxy
       get(:purchases, params).map { |attrs| model_for(:purchase).new(attrs) }
     end
 
-    # Retrieves the secondary deals for a specific deal instance.  By default, this will retrieve other deals from the same region and national.
+    # Retrieves the secondary deals for a specific deal instance.  By default, this
+    #  will retrieve other deals from the same region and national.
     # @param [User]
-    #   If a user is passed, then the user's subscribed regions can be used as a source of secondary deals.
+    #   If a user is passed, then the user's subscribed regions can be used as a source of
+    #   secondary deals.
     # @return [Array]
     #   Returns an array of deal objects.  Does not include the current deal instance.
     def secondary_deals(user=nil, params={})
@@ -123,7 +123,6 @@ module Galaxy
       fulfillment_method == 'shipped'
     end
 
-
     def last_purchase
       self.purchases(:limit => 1).first
     end
@@ -168,7 +167,7 @@ module Galaxy
     end
 
     def image(size="medium")
-      images.select{|x| x.has_key(size)}).first
+      images.select{|x| x.has_key(size)}.first
     end
 
     def merchant_id

@@ -20,38 +20,45 @@ module Galaxy
 
     def self.has_many(resource, opts={})
       resource      = resource.to_s
-      resource_path = (opts[:class].to_s || resource).demodulize.underscore.pluralize
-      resource_name = resource_path.singularize
+      klass_path    = self.to_s.demodulize.underscore.pluralize
+      resource_path = (opts[:class].to_s.presence || resource).pluralize
+      resource_type = resource_path.singularize
 
-      default_params = opts.delete(:default_params).try(:call) || {}
+      default_params = opts.delete(:default_params) || {}
+      default_params = default_params.call if default_params.respond_to?(:call)
 
       class_eval( %Q[
         def #{resource}(params={})
           params.merge!(#{default_params})
 
-          @#{model_name} ||= if self.respond_to?(:#{model})
-            self.#{resource_path}.map{ |r| model_for(:#{resource_name}).new(r) }
+          @#{resource} ||= if self.attributes.has_key?(:#{resource})
+            self.#{resource_path}.map{ |r| model_for(:#{resource_type}).new(r) }
           else
-            model_for(:#{resource_name}).find(
+            model_for(:#{resource_type}).find(
               :all,
-              :from => "/\#{self.class.path}/#{resource_path}/\#{self.id}/#{resource_path}.json",
+              :from => "/\#{self.class.path}/#{klass_path}/\#{self.id}/#{resource_path}.json",
               :params => params)
           end
         end
       ])
     end
 
-    def self.has_one(resource)
-      resource = resource.to_s.singularize
-      resource_path = resource.pluralize
+    def self.has_one(resource, opts={})
+      resource = resource.to_s
       resource_key = "#{resource}_id"
+      resource_type = (opts[:class].presence || resource).to_s.demodulize.underscore
+
+      default_params = opts.delete(:default_params) || {}
+      default_params.call if default_params.respond_to?(:call)
 
       class_eval(%Q[
         def #{resource}(params={})
-          @#{resource} ||= if self.respond_to?(:#{resource})
-            model_for(:#{resource}).new(self.#{resource})
+          @#{resource} ||= if self.attributes.has_key?(:#{resource})
+            model_for(:#{resource_type}).new(self.#{resource})
+          elsif self.respond_to?(:#{resource_key})
+            model_for(:#{resource_type}).find(#{resource_key}, :params => params)
           else
-            model_for(:#{resource}).find(#{resource_key}).json", :params => params)
+            model_for(:#{resource_type}).new(get(:#{resource}), :params => params)
           end
         end
       ])
@@ -81,5 +88,9 @@ module Galaxy
       rescue NameError => e
         galaxy_model_class || raise(e)
     end
+  end
+
+  def self.resource_path(model)
+    model.demodulize.underscore.pluralize
   end
 end

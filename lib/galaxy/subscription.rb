@@ -1,6 +1,8 @@
 module Galaxy
   class Subscription < Galaxy::Base
 
+    has_one :user
+
     def regional?
       !national?
     end
@@ -27,20 +29,6 @@ module Galaxy
 
     def pause
       put(:pause)
-    end
-
-    def user
-      @user ||= User.find(user_id)
-    end
-
-    def unsubscribe
-      self.status = "inactive"
-      save!
-    end
-
-    def subscribe
-      self.status = "active"
-      save!
     end
   end
 end

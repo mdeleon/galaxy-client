@@ -9,7 +9,6 @@ describe Galaxy::Region do
       mock_galaxy(:get, "/api/v2/regions/#{region.id}/current_deal.json", get_headers, deal.to_json, 200)
 
       current_deal = region.current_deal
-
       current_deal.should be_instance_of(Galaxy::Deal)
       current_deal.id.should == "d9c3k19d"
     end

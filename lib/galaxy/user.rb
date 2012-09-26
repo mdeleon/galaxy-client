@@ -3,7 +3,7 @@ module Galaxy
     has_many :deals
     has_many :matches
     has_many :administered_merchants, :class => User
-    has_many :active_purchases, :class => Purchase, :default_params => -> {:filter => "active"}
+    has_many :active_purchases, :class => Purchase, :default_params => Proc.new{ {:filter => "active"} }
     has_many :credit_cards
     has_many :subcriptions
     has_many :purchases

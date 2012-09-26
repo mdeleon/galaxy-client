@@ -4,14 +4,6 @@ module Galaxy
 
     timeify :start_at, :end_at, :expiry_as_of_now
 
-    alias :starting_price :price
-    alias :product_name   :title
-    alias :show_map?      :show_map
-    alias :hide_addresses? :hide_addresses
-    alias :soldout?       :soldout
-    alias :number_sold    :num_purchased
-    alias :ended?         :ended
-
     has_many :purchases
     has_many :locations
     has_many :secondary_deals, :class => Deal
@@ -19,14 +11,6 @@ module Galaxy
     has_one  :region
 
     # TODO: remove after updating conumser web to user :user_id as param instead of user as param
-
-    # Retrieves the secondary deals for a specific deal instance.  By default, this
-    #  will retrieve other deals from the same region and national.
-    # @param [User]
-    #   If a user is passed, then the user's subscribed regions can be used as a source of
-    #   secondary deals.
-    # @return [Array]
-    #   Returns an array of deal objects.  Does not include the current deal instance.
     def secondary_deals(user=nil, params={})
       user && params.merge(:user_id => user.id)
       get(:secondary_deals, params).map { |attrs| model_for(:deal).new(attrs) }
@@ -48,17 +32,42 @@ module Galaxy
       Time.now - end_at
     end
 
+    def soldout?
+      soldout
+    end
+
     def discount
       value - price
+    end
+
+    def hide_addresses?
+      hide_addresses
+    end
+
+    def show_map?
+      show_map
+    end
+
+    def product_name
+      title
+    end
+
+    def starting_price
+      price
     end
 
     def discount_percentage
       discount.to_f/value.to_f*100
     end
 
-    def ended?
-      self.end_at < Time.now
+    def number_sold
+      num_purchased
     end
+
+    def ended?
+      end_at and self.end_at < Time.now
+    end
+    alias :ended :ended?
 
     def max_purchasable(user)
       num_already_purchased = user ? user.num_already_purchased(self) : 0
@@ -82,17 +91,13 @@ module Galaxy
     end
 
     def show_closed_at
-      if end_at && end_at <= Time.now
-        end_at
-      else
-        1.day.ago.in_time_zone(self.region.timezone).end_of_day
-      end
+      ended? ? end_at : 1.day.ago.in_time_zone(self.region.timezone).end_of_day
     end
 
-    alias :has_instructions? :instructions?
     def instructions?
       !instructions.blank?
     end
+    alias :has_instructions? :instructions?
 
     def redemption_coded?
       fulfillment_method == "redemptioncoded"
@@ -133,10 +138,10 @@ module Galaxy
       Time.now > self.end_at
     end
 
-    alias :image_url_abs :image_url
     def image_url(size="medium")
       i = image(size) and i[:url]
     end
+    alias :image_url_abs :image_url
 
     def image(size="medium")
       images.select{|x| x.has_key(size)}.first

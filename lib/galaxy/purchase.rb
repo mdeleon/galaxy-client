@@ -1,8 +1,8 @@
 module Galaxy
   class Purchase < Galaxy::Base
     has_many :coupons
-
-    alias :amount :total
+    has_one  :deal
+    has_one :credit_card
 
     def checkout
       put(:checkout)
@@ -22,6 +22,10 @@ module Galaxy
       else
         model_for(:credit_card).new(self.credit_card)
       end
+    end
+
+    def amount
+      total
     end
 
     def active?

@@ -1,7 +1,5 @@
 module Galaxy
   class SavedDeal < Galaxy::Base
-    def deal
-      @deal ||= model_for(:deal).find(self.deal_id)
-    end
+    has_one :deal
   end
 end

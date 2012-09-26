@@ -1,8 +1,8 @@
 require 'galaxy'
 
 module Galaxy
-  # The Galaxy::Base class inherits from ActiveResource::Base and acts as the central class to store common settings for all Galaxy models.
-  # Currently all Galaxy models inherit from Base.
+  # The Galaxy::Base class inherits from ActiveResource::Base and acts as the central class to
+  # store common settings for all Galaxy models. Currently all Galaxy models inherit from Base.
   class Base < ActiveResource::Base
 
     cattr_accessor :version
@@ -18,19 +18,41 @@ module Galaxy
        self.new(attributes).tap { |resource| resource.save! }
     end
 
-    def self.has_many(model)
-      model = model.to_s
-      class_eval(%Q[def #{model.pluralize}(params={})
-                @#{model.pluralize} ||= model_for(:#{model.singularize}).find(:all, :from => "/\#{self.class.path}/#{self.to_s.demodulize.underscore.pluralize}/\#{self.id}/#{model.pluralize}.json", :params => params)
-              end
-        ])
+    def self.has_many(resource, opts={})
+      resource      = resource.to_s
+      resource_path = (opts[:class].to_s || resource).demodulize.underscore.pluralize
+      resource_name = resource_path.singularize
+
+      default_params = opts.delete(:default_params).try(:call) || {}
+
+      class_eval( %Q[
+        def #{resource}(params={})
+          params.merge!(#{default_params})
+
+          @#{model_name} ||= if self.respond_to?(:#{model})
+            self.#{resource_path}.map{ |r| model_for(:#{resource_name}).new(r) }
+          else
+            model_for(:#{resource_name}).find(
+              :all,
+              :from => "/\#{self.class.path}/#{resource_path}/\#{self.id}/#{resource_path}.json",
+              :params => params)
+          end
+        end
+      ])
     end
 
-    def self.many_to_one(model)
-      model = model.to_s.singularize
+    def self.has_one(resource)
+      resource = resource.to_s.singularize
+      resource_path = resource.pluralize
+      resource_key = "#{resource}_id"
+
       class_eval(%Q[
-        def #{model}(params={})
-          @#{model} ||= model_for(:#{model}).find(:one, :from => "/\#{self.class.path}/#{model.pluralize}/\#{self.#{model}_id}.json", :params => params)
+        def #{resource}(params={})
+          @#{resource} ||= if self.respond_to?(:#{resource})
+            model_for(:#{resource}).new(self.#{resource})
+          else
+            model_for(:#{resource}).find(#{resource_key}).json", :params => params)
+          end
         end
       ])
     end
@@ -42,7 +64,6 @@ module Galaxy
     # and it is extended from Galaxy client's User class, then the global scope ::User class is returned.
     # Otherwise, Galaxy::User class is returned.  If Galaxy::User cannot be found either, a NameError exception
     # will be raised.
-
     def model_for(class_name)
       name = class_name.to_s.split('::').last.camelize
       galaxy_model_class = "Galaxy::#{name}".constantize

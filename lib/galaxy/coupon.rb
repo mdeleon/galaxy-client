@@ -1,5 +1,10 @@
 module Galaxy
   class Coupon < Galaxy::Base
+
+    has_one :credit_card
+    has_one :purchase
+    has_one :deal
+
     def redeem(params={})
       begin
         put(:redeem, params)
@@ -18,24 +23,8 @@ module Galaxy
       @address ||= purchase.location
     end
 
-    def purchase
-      @purchase ||= model_for(:purchase).find(self.purchase_id)
-    end
-
-    def deal
-      @deal ||= model_for(:deal).find(self.deal_id)
-    end
-
     def self.find_by_barcode(barcode)
       find(:all, from: "/api/v2/coupons/find_by_barcode.json", params: {:barcode => barcode})
-    end
-
-    def credit_card
-      @credit_card ||= (self.credit_card_id && CreditCard.find(self.credit_card_id))
-    end
-
-    def purchase
-      @purchase ||= Purchase.find(purchase_id)
     end
 
     def expires_at

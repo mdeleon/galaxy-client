@@ -24,6 +24,10 @@ module Galaxy
       end
     end
 
+    def active?
+      payment_state == "active"
+    end
+
     def charged?
       payment_state == 'charged'
     end

@@ -5,41 +5,20 @@ module Galaxy
     timeify :start_at, :end_at, :expiry_as_of_now
 
     alias :starting_price :price
-    alias :product_name :title
-    alias :show_map? :show_map
+    alias :product_name   :title
+    alias :show_map?      :show_map
     alias :hide_addresses? :hide_addresses
+    alias :soldout?       :soldout
+    alias :number_sold    :num_purchased
+    alias :ended?         :ended
 
-    #locations, merchant, region typically to be included with deal eager load (all) so we add some memoization
-    # => to check for their attributes and can sometimes save another api call
-    def locations
-      @locations ||= if self.respond_to(:locations)
-        self.locations.map{ |x| model_for(:location).new(x) }
-      else
-        model_for(:location).find(:all, :from => "/api/v2/#{self.class.path}/deals/#{self.id}/locations.json")
-      end
-    end
+    has_many :purchases
+    has_many :locations
+    has_many :secondary_deals, :class => Deal
+    has_one  :merchant
+    has_one  :region
 
-    def merchant
-      @merchant ||= if self.respond_to?(:merchant)
-        model_for(:merchant).new(self.merchant)
-      else
-        model_for(:merchant).find(self.merchant_id)
-      end
-    end
-
-    def region
-      @region ||= if self.respond_to?(:region)
-        model_for(:region).new(self.region)
-      else
-        model_for(:region).find(self.region_id)
-      end
-    end
-
-    def purchases(params={})
-      params ||= {}
-      params.merge(:deal_id => self.id)
-      get(:purchases, params).map { |attrs| model_for(:purchase).new(attrs) }
-    end
+    # TODO: remove after updating conumser web to user :user_id as param instead of user as param
 
     # Retrieves the secondary deals for a specific deal instance.  By default, this
     #  will retrieve other deals from the same region and national.
@@ -63,6 +42,10 @@ module Galaxy
 
     def expired?
       soldout? or ended?
+    end
+
+    def time_left
+      Time.now - end_at
     end
 
     def discount
@@ -123,14 +106,16 @@ module Galaxy
       fulfillment_method == 'shipped'
     end
 
-    def last_purchase
-      self.purchases(:limit => 1).first
+    def last_purchase(opts={})
+      p = opts[:user] ? opts[:user].purchases : purchases
+      p.select{ |x| x.deal_id == id }.sort{ |x, y| y.created_at <=> x.created_at}.first
     end
 
+    #TODO: remove after consumer web deploy has updated to only user last_purchase
     def last_purchase_for_user(user)
       return nil unless user
-      purchases = user.purchases.select { |x| x.deal_id == id }
-      purchases.sort { |x, y| y.created_at <=> x.created_at}.first
+      p = user.purchases.select { |x| x.deal_id == id }
+      p.sort { |x, y| y.created_at <=> x.created_at}.first
     end
 
     def external_purchase_url?
@@ -148,19 +133,6 @@ module Galaxy
       Time.now > self.end_at
     end
 
-    def inventory_limit(global=false)
-      global ? self.stats[:global_inventory_limit] : super
-    end
-
-    def num_left
-      self.stats[:num_left]
-    end
-
-    alias :number_sold :num_purchased
-    def num_purchased(global=false)
-      global ? self.stats[:global_num_purchased] : self.stats[:num_purchased]
-    end
-
     alias :image_url_abs :image_url
     def image_url(size="medium")
       i = image(size) and i[:url]
@@ -170,9 +142,6 @@ module Galaxy
       images.select{|x| x.has_key(size)}.first
     end
 
-    def merchant_id
-      merchant.try(:id)
-    end
 
     def merchant_name
       merchant.try(:name)
@@ -184,10 +153,6 @@ module Galaxy
 
     def merchant_addresses
       self.eager_locations.map{|x| x[:address]}.compact
-    end
-
-    def region_id
-      self.region.try(:slug)
     end
 
     def region_name

@@ -1,8 +1,6 @@
 module Galaxy
   class Deal < Galaxy::Base
-    extend Timeify
-
-    timeify :start_at, :end_at, :expiry_as_of_now
+    timeify :start_at, :end_at, :expiry_as_of_now, :expires_at
 
     has_many :locations
 
@@ -57,6 +55,15 @@ module Galaxy
     def discount_percentage
       discount.to_f/value.to_f*100
     end
+    
+    #Helper method
+    def timezone
+      region.timezone
+    end  
 
+    # Helper method
+    def national?
+      region.id == 'united-states'
+    end  
   end
 end

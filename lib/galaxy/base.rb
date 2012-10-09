@@ -12,6 +12,11 @@ module Galaxy
     self.include_root_in_json = true
     self.format = :json
 
+    class << self
+      def raw_with_prefix(path)
+        "#{prefix}#{path}"
+      end
+    end
     # TODO configure this
     # self.ssl_options
 

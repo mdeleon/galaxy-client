@@ -13,8 +13,8 @@ module Galaxy
     self.format = :json
 
     class << self
-      def raw_with_prefix(url)
-        "#{prefix}#{url}"
+      def raw_with_prefix(path)
+        "#{prefix}#{path}"
       end
     end
     # TODO configure this

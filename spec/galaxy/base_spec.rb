@@ -14,7 +14,7 @@ describe Galaxy::Base do
   end
 
   describe ".raw_with_prefix" do
-    it "returns the prefix + url" do
+    it "returns the prefix + path" do
       expect(Galaxy::Model.raw_with_prefix("test/jhk/qw")).to eq(
         "/api/v2/test/jhk/qw"
       )

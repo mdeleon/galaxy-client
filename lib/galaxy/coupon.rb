@@ -1,9 +1,12 @@
 module Galaxy
   class Coupon < Galaxy::Base
+    extend Timeify
 
-    has_one :credit_card
-    has_one :purchase
-    has_one :deal
+    timeify :expires_at, :redeemed_at, :expires_at
+
+    belongs_to :credit_card
+    belongs_to :purchase
+    belongs_to :deal
 
     def redeem(params={})
       begin
@@ -23,6 +26,10 @@ module Galaxy
       @address ||= purchase.location
     end
 
+    def location_specific?
+      self.purchase.location.present?
+    end
+
     def self.find_by_barcode(barcode)
       find(:all, from: "/api/v2/coupons/find_by_barcode.json", params: {:barcode => barcode})
     end
@@ -35,8 +42,16 @@ module Galaxy
       expires_at ? expires_at.in_time_zone(timezone) : nil
     end
 
+    def has_expiration_date?
+      expires_at.present?
+    end
+
     def expired?
-      state == 'expired' or (valid? and expires_at and expires_at.to_date.end_of_day < Time.now)
+      state == 'expired' or (valid? and expires_at and expires_at.to_date.end_of_day <= Time.now)
+    end
+
+    def expiring_soon?
+      valid? and !expired? and expires_at - 14.days < Time.now
     end
 
     def valid?

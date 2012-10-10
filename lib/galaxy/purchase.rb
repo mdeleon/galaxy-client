@@ -1,8 +1,12 @@
 module Galaxy
   class Purchase < Galaxy::Base
-    has_many :coupons
-    has_one  :deal
-    has_one :credit_card
+    extend Timeify
+
+    has_many   :coupons
+    belongs_to :deal
+    belongs_to :credit_card
+
+    timeify :created_at
 
     def checkout
       put(:checkout)

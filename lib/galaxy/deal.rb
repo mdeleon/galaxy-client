@@ -7,8 +7,8 @@ module Galaxy
     has_many :purchases
     has_many :locations
     has_many :secondary_deals, :class => Deal
-    has_one  :merchant
-    has_one  :region
+    belongs_to  :merchant
+    belongs_to  :region
 
     # TODO: remove after updating conumser web to user :user_id as param instead of user as param
     def secondary_deals(user=nil, params={})
@@ -52,6 +52,26 @@ module Galaxy
       title
     end
 
+    def highlights
+      super || ""
+    end
+
+    def time_left_hash
+      remaining_time = time_left.round
+      total = remaining_time
+      days = remaining_time / 1.day
+      hours = (remaining_time -= days.days) / 1.hour
+      minutes = (remaining_time -= hours.hours) / 1.minute
+      seconds = (remaining_time -= minutes.minutes) / 1.second
+      {
+        days: days,
+        hours: hours,
+        minutes: minutes,
+        seconds: seconds,
+        total: total
+      }
+    end
+
     def starting_price
       price
     end
@@ -68,6 +88,27 @@ module Galaxy
       end_at and self.end_at < Time.now
     end
     alias :ended :ended?
+
+    def self.find_by_regions(region_ids, user = nil)
+      in_flight_deals = []
+      region_ids.uniq.each do |region_id|
+        region =  Region.find(region_id)
+        if user
+          in_flight_deals.concat region.deals(:filter => "in_flight", :user_id => user.id).reject{ |d| user.fulfilled_deal?(d) }
+        else
+          in_flight_deals.concat region.deals(:filter => "in_flight")
+        end
+      end
+
+      in_flight_deals.reject!{ |deal| deal.soldout || deal.expired? }
+
+      # sort deals with the most current start_at deal at the top
+      in_flight_deals.sort_by { |deal| deal.start_at.to_i*-1 }
+    end
+
+    def card_linked?
+      self.type == "card-linked"
+    end
 
     def max_purchasable(user)
       num_already_purchased = user ? user.num_already_purchased(self) : 0

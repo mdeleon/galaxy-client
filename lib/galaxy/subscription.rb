@@ -1,7 +1,7 @@
 module Galaxy
   class Subscription < Galaxy::Base
 
-    has_one :user
+    belongs_to :user
 
     def regional?
       !national?
@@ -25,6 +25,10 @@ module Galaxy
 
     def active?
       self.status == "active"
+    end
+
+    def inactive?
+      !active?
     end
 
     def pause

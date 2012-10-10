@@ -29,7 +29,7 @@ module Galaxy
 
       class_eval( %Q[
         def #{resource}(params={})
-          params.merge!(#{default_params})
+          params = params.merge(#{default_params})
 
           @#{resource} ||= if self.attributes.has_key?(:#{resource})
             self.#{resource_path}.map{ |r| model_for(:#{resource_type}).new(r) }
@@ -43,7 +43,7 @@ module Galaxy
       ])
     end
 
-    def self.has_one(resource, opts={})
+    def self.belongs_to(resource, opts={})
       resource = resource.to_s
       resource_key = "#{resource}_id"
       resource_type = (opts[:class].presence || resource).to_s.demodulize.underscore
@@ -53,10 +53,12 @@ module Galaxy
 
       class_eval(%Q[
         def #{resource}(params={})
+          params = params.merge(#{default_params})
+
           @#{resource} ||= if self.attributes.has_key?(:#{resource})
             model_for(:#{resource_type}).new(self.#{resource})
           elsif self.respond_to?(:#{resource_key})
-            model_for(:#{resource_type}).find(#{resource_key}, :params => params)
+            model_for(:#{resource_type}).find(:one, :from => #{resource_key}, :params => params)
           else
             model_for(:#{resource_type}).new(get(:#{resource}), :params => params)
           end

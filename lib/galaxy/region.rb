@@ -1,7 +1,7 @@
 module Galaxy
   class Region < Galaxy::Base
 
-    has_one  :current_deal, :class => Deal
+    belongs_to :current_deal, :class => Deal
     has_many :deals
 
     def selectable
@@ -22,13 +22,16 @@ module Galaxy
       "united-states"
     end
 
-
     def national
-      Region.find("united-states")
+      @national ||= Region.find("united-states")
     end
 
     def all
       super.select { |r| r.selectable? }
+    end
+
+    def live_deals
+      active ? deals(:filter => [:in_flight, :daily_deals, :not_ended]) : []
     end
 
     def active?

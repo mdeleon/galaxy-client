@@ -1,6 +1,5 @@
 module Galaxy
   class Subscription < Galaxy::Base
-
     belongs_to :user
 
     def regional?

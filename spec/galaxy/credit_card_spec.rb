@@ -9,4 +9,29 @@ describe Galaxy::CreditCard do
       credit_card.make_primary
     end
   end
+
+  describe "#display_number" do
+    it "show correct credit card number" do
+      credit_card = CreditCard.find 1
+      credit_card.display_number.should be == "VISA - 555 4444"
+    end
+
+    it "show invalid credit card number" do
+      credit_card = CreditCard.find 3
+      credit_card.display_number.should == "Undefined Vendor - 75532315"
+    end
+  end
+
+  describe "#type_name" do
+    it "find defined credit card type name" do
+      credit_card = CreditCard.find 1
+      credit_card.type_name.should be == "VISA"
+    end
+
+    it "find undefined credit card type name" do
+      credit_card = CreditCard.find 3
+      credit_card.type_name.should be == "Undefined Vendor"
+    end
+  end
+
 end

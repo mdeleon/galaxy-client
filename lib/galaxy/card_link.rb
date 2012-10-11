@@ -24,6 +24,10 @@ module Galaxy
       state == 'linked'
     end
 
+    def expired?
+      deal.expires_at && deal.expires_at <= Time.now
+    end
+
     def fulfilled?
       state == 'fulfilled'
     end

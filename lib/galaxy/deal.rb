@@ -72,6 +72,20 @@ module Galaxy
       }
     end
 
+    def calculate_cost(user, qty)
+      if user and user.credits > 0
+        subtotal = price * qty
+        credit = [subtotal, user.credits].min
+        total = subtotal - credit
+      else
+        credit = 0
+        subtotal = price * qty
+        total = subtotal
+      end
+
+      [credit, subtotal, total]
+    end
+
     def starting_price
       price
     end
@@ -110,9 +124,18 @@ module Galaxy
       self.type == "card-linked"
     end
 
+    def purchasable?(user=nil)
+      max_purchasable_per_transaction(user) > 0
+    end
+
     def max_purchasable(user)
       num_already_purchased = user ? user.num_already_purchased(self) : 0
       [self.purchasable_number, (self.max_per_user || 10) - num_already_purchased].min
+    end
+
+    def max_purchasable_per_transaction(user=nil)
+      num_already_purchased = (user && user.active_purchases.map { |x| x.deal_id == id ? x.num_bought : 0}.reduce(:+)) || 0
+      [purchasable_number, (max_per_user || 10) - num_already_purchased].min
     end
 
     def in_flight?

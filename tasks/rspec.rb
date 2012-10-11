@@ -11,7 +11,6 @@ begin
     t.rspec_opts = ["--format", "documentation"]
     t.pattern = "spec/**/*_spec.rb"
   end
-
 rescue LoadError => e
   p e
 end

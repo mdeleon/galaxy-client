@@ -4,15 +4,37 @@ module Galaxy
     belongs_to :current_deal, :class => Deal
     has_many :deals
 
+    class << self
+      def active_from_ip(ip)
+        object_or_nil do
+          region = self.from_ip(ip)
+          return region if region.active
+        end
+      end
+
+      def by_id_or_nil(id)
+        object_or_nil { Region.find(id) }
+      end
+
+      def selectable_regions
+        find(:all).select{|r| r.selectable?}
+      end
+
+      private
+      def object_or_nil
+        begin
+          yield
+        rescue ActiveResource::ResourceNotFound
+          nil
+        end
+      end
+    end
+
     def selectable
       # region has to be active in order to be selectable.
       active? && !!(super)
     end
     alias_method :selectable?, :selectable
-
-    def self.selectable_regions
-      find(:all).select{|r| r.selectable?}
-    end
 
     def national?
       id == 'united-states'

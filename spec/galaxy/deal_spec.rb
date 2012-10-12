@@ -50,6 +50,26 @@ describe Galaxy::Deal do
     end
   end
 
+  describe "#time_left_hash" do
+    it "returns a hash representing time left on a deal" do
+      subject.stub(time_left: 871437)
+      expect(subject.time_left_hash).to eq({
+        days: 10,
+        hours: 2,
+        minutes: 3,
+        seconds: 57,
+        total: 871437
+      })
+    end
+  end
+
+  describe "#discount" do
+    it "should be the difference of value and price" do
+      subject.value = 12345
+      subject.price = 12301
+      expect(subject.discount).to eq(44)
+    end
+  end
 
   describe "#expired?" do
     it "a soldout deal should be expired" do

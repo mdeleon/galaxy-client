@@ -39,7 +39,7 @@ module Galaxy
     end
 
     def has_expiration_date?
-      expires_at.present?ex
+      expires_at.present?
     end
 
     def expired?

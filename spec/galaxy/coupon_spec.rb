@@ -22,6 +22,21 @@ describe Galaxy::Coupon do
     end
   end
 
+  describe "#has_expiration_date?" do
+    context "has expires_at" do
+      it "returns true" do
+        subject.expires_at = Time.now + 1.week
+        expect(subject.has_expiration_date?).to be_true
+      end
+    end
+    context "has no expires_at" do
+      it "returns false" do
+        subject.expires_at = nil
+        expect(subject.has_expiration_date?).to be_false
+      end
+    end
+  end
+
   describe "#expiring_soon?" do
     before {
       subject.stub(:valid? => true)

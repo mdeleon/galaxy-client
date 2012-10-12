@@ -2,7 +2,7 @@ module Galaxy
   class Coupon < Galaxy::Base
     extend Timeify
 
-    timeify :expires_at, :redeemed_at, :expires_at
+    timeify :expires_at, :redeemed_at, :expires_at, :created_at
 
     belongs_to :credit_card
     belongs_to :purchase

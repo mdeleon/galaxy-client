@@ -6,27 +6,28 @@ describe Galaxy::Subscription do
   let(:region) { double(:region, :name => 'San Francisco', :id => 'san-francisco') }
   let(:subscription) { s = Galaxy::Subscription.new(:user_id => user.id, :region_id =>region.id,:region_name =>region.name, :zip => "94111") }
 
+  subject { Galaxy::Subscription.new(:id => "d02k49d", :created_at => nil) }
+
+  it_timeifies :created_at
+
   describe "#subscribe" do
     it "sends PUT to /subscriptions/:id/subscribe.json" do
-      subscription = Galaxy::Subscription.new(:id => "d02k49d")
-      mock_galaxy(:put, "/api/v2/subscriptions/#{subscription.id}/subscribe.json", post_headers, nil, 200)
-      subscription.subscribe
+      mock_galaxy(:put, "/api/v2/subscriptions/#{subject.id}/subscribe.json", post_headers, nil, 200)
+      subject.subscribe
     end
   end
 
   describe "#unsubscribe" do
     it "sends PUT to /subscriptions/:id/unsubscribe.json" do
-      subscription = Galaxy::Subscription.new(:id => "d02k49d")
-      mock_galaxy(:put, "/api/v2/subscriptions/#{subscription.id}/unsubscribe.json", post_headers, nil, 200)
-      subscription.unsubscribe
+      mock_galaxy(:put, "/api/v2/subscriptions/#{subject.id}/unsubscribe.json", post_headers, nil, 200)
+      subject.unsubscribe
     end
   end
 
   describe "#pause" do
     it "sends PUT to /subscriptions/:id/pause.json" do
-      subscription = Galaxy::Subscription.new(:id => "d02k49d")
-      mock_galaxy(:put, "/api/v2/subscriptions/#{subscription.id}/pause.json", post_headers, nil, 200)
-      subscription.pause
+      mock_galaxy(:put, "/api/v2/subscriptions/#{subject.id}/pause.json", post_headers, nil, 200)
+      subject.pause
     end
   end
 

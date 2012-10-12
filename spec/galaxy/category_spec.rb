@@ -4,6 +4,9 @@ require "galaxy/category"
 require 'spec_helper'
 
 describe Galaxy::Category do
+  subject { Galaxy::Category.new :created_at => nil }
+  it_timeifies :created_at
+
   describe ".sorted_list" do
     let(:h) { double :h, :name => "H" }
     let(:b) { double :b, :name => "B" }

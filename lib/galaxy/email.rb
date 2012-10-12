@@ -14,6 +14,10 @@ module Galaxy
       put :click
     end
 
+    def unsubscribe
+      put :unsubscribe
+    end
+
     # Sends an invite email to multiple email address.
     # @param [Hash] params
     #   :user_id is the id of the user that we send the invitations on behalf of.

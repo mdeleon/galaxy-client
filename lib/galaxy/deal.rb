@@ -1,8 +1,6 @@
 module Galaxy
   class Deal < Galaxy::Base
-    extend Timeify
-
-    timeify :start_at, :end_at, :expiry_as_of_now
+    timeify :start_at, :end_at, :expiry_as_of_now, :expires_at
 
     has_many :purchases
     has_many :locations
@@ -227,5 +225,15 @@ module Galaxy
       self.locations.map{|x| x.readable_address}
     end
     alias :merchant_addresses :addresses
+
+    #Helper method
+    def timezone
+      region.timezone
+    end
+
+    # Helper method
+    def national?
+      region.id == 'united-states'
+    end
   end
 end

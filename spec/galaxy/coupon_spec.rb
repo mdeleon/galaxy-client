@@ -4,11 +4,13 @@ require "galaxy/coupon"
 describe Galaxy::Coupon do
 
   subject {
-    Galaxy::Coupon.new :expires_at => nil,
-    :state => nil
+    Galaxy::Coupon.new(:expires_at => nil,
+    :created_at => nil,
+    :redeemed_at => nil,
+    :state => nil)
   }
 
-  it_timeifies :expires_at
+  it_timeifies :expires_at, :created_at, :redeemed_at
 
   has_predicate(:redeemed?).by_field(:state).with_true_value_of("redeemed")
   has_predicate(:valid?).by_field(:state).with_true_value_of("valid")
@@ -16,9 +18,8 @@ describe Galaxy::Coupon do
 
   describe "#redeem" do
     it "sends PUT to /coupons/:id/redeem.json" do
-      coupon = Galaxy::Coupon.new(:id => "d02k49d")
-      mock_galaxy(:put, "/api/v2/coupons/#{coupon.id}/redeem.json", post_headers, nil, 200)
-      coupon.redeem
+      mock_galaxy(:put, "/api/v2/coupons/#{subject.id}/redeem.json", post_headers, nil, 200)
+      subject.redeem.code.should eq(200)
     end
   end
 

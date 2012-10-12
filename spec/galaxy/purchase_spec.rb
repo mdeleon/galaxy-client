@@ -2,18 +2,16 @@ require File.expand_path('../../spec_helper', __FILE__)
 require "galaxy/purchase"
 
 describe Galaxy::Purchase do
+  subject { Galaxy::Purchase.new(:id => "d02k49d", :created_at => nil) }
   it_timeifies :created_at
 
   has_predicate(:charged?).by_field(:payment_state).with_true_value_of("charged")
   has_predicate(:active?).by_field(:payment_state).with_true_value_of("active")
 
-  subject { Galaxy::Purchase.new(:created_at => nil)}
-
   describe "#checkout" do
     it "sends PUT to /purchases/:id/checkout.json" do
-      purchase = Galaxy::Purchase.new(:id => "d02k49d")
-      mock_galaxy(:put, "/api/v2/purchases/#{purchase.id}/checkout.json", post_headers, nil, 200)
-      purchase.checkout
+      mock_galaxy(:put, "/api/v2/purchases/#{subject.id}/checkout.json", post_headers, nil, 200)
+      subject.checkout
     end
   end
 

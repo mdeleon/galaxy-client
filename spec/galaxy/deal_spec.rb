@@ -2,14 +2,17 @@ require File.expand_path('../../spec_helper', __FILE__)
 require "galaxy/deal"
 
 describe Galaxy::Deal do
-  it_timeifies :start_at, :end_at, :expiry_as_of_now
 
   subject {
     Galaxy::Deal.new :start_at => nil,
     :end_at => nil,
     :expiry_as_of_now => nil,
-    :expired? => nil
-    }
+    :expires_at => nil,
+    :expired? => nil,
+    :region => nil
+  }
+
+  it_timeifies :start_at, :end_at, :expiry_as_of_now, :expires_at
 
   has_predicate(:approved?).by_field(:state).with_true_value_of("approved")
   has_predicate(:approved?).by_field(:state).with_true_value_of("in-flight")
@@ -326,6 +329,18 @@ describe Galaxy::Deal do
         subject.stub(:instructions).and_return(nil)
         expect(subject).not_to have_instructions
       end
+    end
+  end
+
+  describe "#national?" do
+    it "returns true if the deal's region is 'united-states'" do
+      subject.stub_chain(:region, :id).and_return("united-states")
+      subject.should be_national
+    end
+
+    it "returns false if the deal's region is not 'united-states'" do
+      subject.stub_chain(:region, :id).and_return("xyc")
+      subject.should_not be_national
     end
   end
 end

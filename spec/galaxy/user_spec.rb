@@ -5,9 +5,12 @@ describe Galaxy::User do
   subject {Galaxy::User.new(user_hash.merge(:last_login_at => nil))}
   it_timeifies :last_login_at
 
-  let(:user_hash) { { id: "ABC123", email: "test@test.com", postal_code: "94110", :lastname => "bar", firstname: "foo", credits: 0, share_link: "whatevers" } }
+  let(:user_hash) { { id: "ABC123", email: "test@test.com", :created_at => nil, postal_code: "94110",
+    :lastname => "bar", firstname: "foo", credits: 0, share_link: "whatevers" } }
   let(:users_ary) { { :users => [user_hash] } }
   let(:http_ok)   { { :status => 'success' } }
+
+  it_timeifies :created_at, :last_login_at
 
   describe ".find_external_admin_by_email" do
     let(:user) { double :user }

@@ -1,5 +1,6 @@
 module Galaxy
   class Category < Galaxy::Base
+    timeify :created_at
 
     def self.sorted_list
       #Should not display improper categories

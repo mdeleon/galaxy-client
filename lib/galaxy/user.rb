@@ -1,7 +1,7 @@
 module Galaxy
   class User < Galaxy::Base
     extend Timeify
-    timeify :last_login_at
+    timeify :last_login_at, :created_at
 
     has_many :deals
     has_many :matches

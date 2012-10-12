@@ -2,6 +2,8 @@ module Galaxy
   class Subscription < Galaxy::Base
     belongs_to :user
 
+    timeify :created_at
+
     def regional?
       !national?
     end

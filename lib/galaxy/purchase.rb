@@ -1,5 +1,7 @@
 module Galaxy
   class Purchase < Galaxy::Base
+    timeify :created_at
+    
     has_many :coupons
 
     def checkout

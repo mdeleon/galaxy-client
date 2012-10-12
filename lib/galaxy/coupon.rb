@@ -1,5 +1,7 @@
 module Galaxy
   class Coupon < Galaxy::Base
+    timeify :created_at, :redeemed_at, :expires_at
+    
     def redeem(params={})
       begin
         put(:redeem, params)

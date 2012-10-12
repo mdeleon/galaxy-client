@@ -4,6 +4,7 @@ module Galaxy
   # The Galaxy::Base class inherits from ActiveResource::Base and acts as the central class to store common settings for all Galaxy models.
   # Currently all Galaxy models inherit from Base.
   class Base < ActiveResource::Base
+    extend Timeify
 
     cattr_accessor :version
     cattr_accessor :path
@@ -11,6 +12,11 @@ module Galaxy
     self.include_root_in_json = true
     self.format = :json
 
+    class << self
+      def raw_with_prefix(path)
+        "#{prefix}#{path}"
+      end
+    end
     # TODO configure this
     # self.ssl_options
 

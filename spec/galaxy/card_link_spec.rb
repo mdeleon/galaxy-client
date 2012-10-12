@@ -80,16 +80,16 @@ describe Galaxy::CardLink do
     context "when cardlink exists" do
       it "should return the existing cardlink" do
         card_link_linked.should_receive(:link)
-       expect( CardLink.create_or_relink(1, 1, card_link_linked)).to eq(card_link)
+       expect( Galaxy::CardLink.create_or_relink(1, 1, card_link_linked)).to eq(card_link)
       end
     end
     context "when card link does not exist" do
       it "should return a new CardLink object" do
-        CardLink.should_receive(:create).with({:user_id => 1,
+        Galaxy::CardLink.should_receive(:create).with({:user_id => 1,
                                                :deal_id => 1})
                                         .and_return { card_link_linked}
         card_link_linked.should_receive(:link).exactly(1).times
-        expect(CardLink.create_or_relink(1, 1, nil)).to eq(card_link)
+        expect(Galaxy::CardLink.create_or_relink(1, 1, nil)).to eq(card_link)
       end
     end
   end

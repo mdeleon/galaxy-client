@@ -1,7 +1,7 @@
 module Galaxy
   class Category < Galaxy::Base
 
-    def sorted_list
+    def self.sorted_list
       #Should not display improper categories
       cats = Category.all.inject([]) do |list, elem|
         category_for_display.index(elem.name) ? list << elem : list

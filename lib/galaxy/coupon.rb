@@ -8,6 +8,10 @@ module Galaxy
     belongs_to :purchase
     belongs_to :deal
 
+    def self.find_by_barcode(barcode)
+      find(:all, from: "/api/v2/coupons/find_by_barcode.json", params: {:barcode => barcode})
+    end
+
     def redeem(params={})
       begin
         put(:redeem, params)
@@ -30,20 +34,12 @@ module Galaxy
       self.purchase.location.present?
     end
 
-    def self.find_by_barcode(barcode)
-      find(:all, from: "/api/v2/coupons/find_by_barcode.json", params: {:barcode => barcode})
-    end
-
-    def expires_at
-      super ? Time.parse(super) : nil
-    end
-
     def expiry(timezone)
       expires_at ? expires_at.in_time_zone(timezone) : nil
     end
 
     def has_expiration_date?
-      expires_at.present?
+      expires_at.present?ex
     end
 
     def expired?
@@ -51,7 +47,7 @@ module Galaxy
     end
 
     def expiring_soon?
-      valid? and !expired? and expires_at - 14.days < Time.now
+      valid? and !expired? and expires_at and  expires_at - 14.days < Time.now
     end
 
     def valid?
@@ -63,15 +59,15 @@ module Galaxy
     end
 
     def cancelled?
-      self.state == 'cancelled'
+      state == 'cancelled'
     end
 
     def active?
-      !cancelled? && !redeemed? && !expired?
+      (!cancelled? && !redeemed? && !expired?)
     end
 
     def redeemed?
-      self.state == 'redeemed'
+      state == 'redeemed'
     end
 
     def deal_shareable?

@@ -2,9 +2,10 @@ require File.expand_path('../../spec_helper', __FILE__)
 require "galaxy/user"
 
 describe Galaxy::User do
+  subject {Galaxy::User.new(user_hash.merge(:last_login_at => nil))}
   it_timeifies :last_login_at
 
-  let(:user_hash) { { id: "ABC123", email: "test@test.com", postal_code: "94110", firstname: "foo", credits: 0, share_link: "whatevers" } }
+  let(:user_hash) { { id: "ABC123", email: "test@test.com", postal_code: "94110", :lastname => "bar", firstname: "foo", credits: 0, share_link: "whatevers" } }
   let(:users_ary) { { :users => [user_hash] } }
   let(:http_ok)   { { :status => 'success' } }
 
@@ -44,44 +45,48 @@ describe Galaxy::User do
   describe "#full_name" do
     context "user with a full_name" do
       it "should get the full_name" do
-        account_hold_user_with_purchases.full_name.should == "foo bar"
+        subject.full_name.should == "foo bar"
       end
     end
 
     context "user without a full_name" do
       it "should return void without a full_name" do
-        account_hold_user_with_no_purchases.full_name.should == ""
+        subject.firstname = subject.lastname = nil
+        subject.full_name.should == ""
       end
     end
   end
 
   describe "#has_firstname?" do
     it "should return false if the user has not a firstname" do
-      account_hold_user_with_no_purchases.has_firstname?.should be_false
+      subject.firstname = nil
+      subject.has_firstname?.should be_false
     end
 
     it "sould return false if the user's firstname is blank string " do
-      account_hold_user_with_no_purchases.firstname =""
-      account_hold_user_with_no_purchases.has_firstname?.should be_false
+      subject.firstname =""
+      subject.has_firstname?.should be_false
     end
 
     it "should return true if the user has a firstanme" do
-      account_hold_user_with_purchases.has_firstname?.should be_true
+      subject.has_firstname?.should be_true
     end
   end
 
   describe "#has_lastname?" do
     it "should return false if the user has not a lastname" do
-      account_hold_user_with_no_purchases.has_lastname?.should be_false
+      subject.lastname = nil
+      subject.has_lastname?.should be_false
     end
 
     it "sould return false if the user's lastname is blank string " do
-      account_hold_user_with_no_purchases.lastname =""
-      account_hold_user_with_no_purchases.has_lastname?.should be_false
+      subject.lastname = ''
+      subject.has_lastname?.should be_false
     end
 
     it "should return true if the user has a lastname" do
-      account_hold_user_with_purchases.has_lastname?.should be_true
+      subject.lastname = 'test'
+      subject.has_lastname?.should be_true
     end
   end
 
@@ -93,14 +98,15 @@ describe Galaxy::User do
 
     context "when the deal has already been saved" do
       it "doesn't create a new saved_deal" do
-        SavedDeal.should_not_receive(:create)
+        Galaxy::SavedDeal.should_not_receive(:create)
         subject.save_deal 234
       end
     end
 
     context "when the deal is not saved" do
       it "create a new saved_deal" do
-        SavedDeal.should_receive(:create).with(
+        subject.stub(:id => 567)
+        Galaxy::SavedDeal.should_receive(:create).with(
           :user_id => 567,
           :deal_id => 235
         )
@@ -271,6 +277,30 @@ describe Galaxy::User do
         expect(subject.link_deal(11)).to eq('linked_already')
       end
     end
+
+    context "when cardlink has not been created and not linked" do
+      before do
+        subject.stub(:card_links).and_return []
+        Galaxy::CardLink.stub(:create_or_relink)
+        subject.stub(:reload)
+        subject.stub(:unsave_deal)
+      end
+
+      it "create a card_link" do
+        Galaxy::CardLink.should_receive(:create_or_relink)
+        subject.link_deal(1)
+      end
+
+      it "reload the user" do
+        subject.should_receive(:reload)
+        subject.link_deal(1)
+      end
+
+      it "unsave the offer" do
+        subject.should_receive(:unsave_deal)
+        subject.link_deal(1)
+      end
+    end
   end
 
   describe "#has_purchased?" do
@@ -359,32 +389,6 @@ describe Galaxy::User do
     end
   end
 
-    context "when cardlink has not been created and not linked" do
-      before do
-        subject.stub(:card_links).and_return []
-        CardLink.stub(:create_or_relink)
-        subject.stub(:reload)
-        subject.stub(:unsave_deal)
-      end
-
-      it "create a card_link" do
-        CardLink.should_receive(:create_or_relink)
-        subject.link_deal(1)
-      end
-
-      it "reload the user" do
-        subject.should_receive(:reload)
-        subject.link_deal(1)
-      end
-
-      it "unsave the offer" do
-        subject.should_receive(:unsave_deal)
-        subject.link_deal(1)
-      end
-    end
-  end #end #link_deal
-
-
   describe "#card_links_for_merchant" do
     let(:merchant) { double(:id => 1) }
 
@@ -405,354 +409,4 @@ describe Galaxy::User do
       expect(subject.card_links_for_merchant(merchant)).to eq([])
     end
   end
-
-  describe "#subscribe_by_region" do
-    context "when user has never subscribe to this region" do
-      it "create the subscription" do
-        subscribed_user.stub(:subscriptions).and_return []
-        subscribed_user.subscribe_by_region("chicago").region_id.should eq("chicago")
-      end
-    end
-
-    context "when user has subscribe to this region" do
-      it "active all the inactive subscritions" do
-        denver = Dupe.create :subscription, :region_id => "denver", :zip => "80202", :status => 'active'
-        another_denver = Dupe.create :subscription, :region_id => "denver", :zip => "80201", :status => 'false'
-        subscribed_user.stub(:subscriptions).and_return [Subscription.find(denver.id), Subscription.find(another_denver.id)]
-        subscribed_user.subscribe_by_region("denver").region_id.should eq("denver")
-        another_denver.status.should eq('active')
-      end
-    end
-  end
-
-  describe "#subscribe_by_zip" do
-    context "when user has never subscribe to this zip" do
-      it "create the subscription" do
-        subscribed_user.stub(:subscriptions){Subscription.all}
-        Email.should_not_receive(:account_change)
-        subscribed_user.subscribe_by_zip("94110").region_id.should eq("san-francisco")
-      end
-    end
-
-    context "when user has subscribe to this zip" do
-      it "active all the inactive subscritions" do
-        denver = Dupe.create :subscription, :region_id => "denver", :zip => "80202", :status => 'active'
-        another_denver = Dupe.create :subscription, :region_id => "denver", :zip => "80201", :status => 'false'
-        subscribed_user.stub(:subscriptions){Subscription.all}
-        Email.should_receive(:account_change)
-        subscribed_user.subscribe_by_zip("80202").region_id.should eq("denver")
-        another_denver.status.should eq('active')
-      end
-    end
-
-    context "when user has subscribe to this region" do
-      it "create the subscription and sent account_change email" do
-        chicago_sub = Dupe.create :subscription, :region_id => "chicago", :zip => "60606", :status => 'active'
-        subscribed_user.stub(:subscriptions){Subscription.all}
-        Email.should_receive(:account_change)
-        subscribed_user.subscribe_by_zip("60607").zip.should eq("60607")
-        subscribed_user.subscriptions.size.should eq(2)
-      end
-    end
-
-    context "when user subscribe to a out-of-market region" do
-      it "create the subscription and sent account_change email" do
-        subscribed_user.stub(:subscriptions){Subscription.all}
-        Email.should_receive(:account_change)
-        subscribed_user.subscribe_by_zip("42211").region_id.should eq("out-of-market")
-      end
-    end
-  end
-
-    describe "#has_subscribed?" do
-    before do
-      Dupe.create :subscription, :id => 5, :user_id => 3, :zip=>'80202', :status => "active", :region_id => "denver", :region_name =>'Denver'
-      Dupe.create :subscription, :id => 6, :user_id => 3, :zip=>'91210', :status => "inactive", :region_id => "los-angeles", :region_name =>'Los Angeles'
-    end
-
-    context "return true" do
-      it "should retrun ture if the user's subscription is active" do
-        account_hold_user_with_purchases.has_subscribed?("denver").should be_true
-      end
-    end
-
-    context "return false" do
-      it "should return false with the unsubscribed region" do
-        account_hold_user_with_purchases.has_subscribed?("chicago").should be_false
-      end
-
-      it "should return false when user have no subscriptions" do
-        account_hold_user_with_no_purchases.has_subscribed?("denver").should be_false
-      end
-
-      it "should return false with the inactive subscription" do
-        account_hold_user_with_purchases.has_subscribed?("los-angeles").should be_false
-      end
-    end
-  end
-
-  describe "#regions_not_subscribed_before" do
-    before do
-      Dupe.create :subscription, :id => 5, :user_id => 3, :zip=>'80202', :status => "active", :region_id => "denver", :region_name =>'Denver'
-      Dupe.create :subscription, :id => 6, :user_id => 3, :zip=>'91210', :status => "inactive", :region_id => "los-angeles", :region_name =>'Los Angeles'
-    end
-
-    it "get the not subscribed region in an array" do
-      account_hold_user_with_purchases.regions_not_subscribed_before.should have_exactly((Region.selectable_regions).size - 2).items
-    end
-  end
-
-  describe "#has_full_name?" do
-    it "should return false if the user has not firstname and lastname" do
-      account_hold_user_with_no_purchases.has_full_name?.should be_false
-    end
-
-    it "should return false if the user only has a firstname" do
-      account_hold_user_with_no_purchases.firstname = "firstname"
-      account_hold_user_with_no_purchases.has_full_name?.should be_false
-    end
-
-    it "should return false if the user only has a lastname" do
-      account_hold_user_with_no_purchases.lastname = "lastname"
-      account_hold_user_with_no_purchases.has_full_name?.should be_false
-    end
-
-    it "should return true is the user has firstname and lastname" do
-      account_hold_user_with_purchases.has_full_name?.should be_true
-    end
-  end
-
-  describe "#unsubscribe_by_region_id" do
-    before do
-      Dupe.create :subscription, :id => 5, :user_id => 3, :zip=>'80202', :status => "active", :region_id => "denver", :region_name =>'Denver'
-    end
-
-    it "should unsubscrbe the user's subscription" do
-      subscription = account_hold_user_with_purchases.subscriptions.first
-      account_hold_user_with_purchases.unsubscribe_by_region_id("denver")
-      subscription.should_not be_active
-    end
-  end
-
-  describe ".unsubscribe_by_email_token" do
-    before do
-      Dupe.create :reset_token, :id => 1, :user_id => 3
-      Dupe.create :subscription, :id => 5, :user_id => 3, :zip=>'80202', :status => "active", :region_id => "denver", :region_name =>'Denver'
-      Dupe.create :email, :id => "1", :user_id => 3, :to_user_id => 3
-    end
-
-    it "should unsubscribe by email token successfully" do
-      User.unsubscribe_by_email_token("1","denver")
-      subscription = account_hold_user_with_purchases.subscriptions.first
-      subscription.should_not be_active
-    end
-  end
-
-  describe "#find_coupon" do
-    before do
-      Dupe.create :coupon, :id => 1, :user_id => 3, :purchase_id => 1
-    end
-
-    context "return coupon successfully" do
-      it "get the user's coupons" do
-        coupon = Coupon.find(1)
-        account_hold_user_with_purchases.find_coupon("1").should == coupon
-      end
-    end
-
-    context "return coupon unsuccessfully" do
-      it "return nil with incrrect parameter" do
-        account_hold_user_with_purchases.find_coupon("valid").should be_nil
-      end
-
-      it "return nil with the no_coupon user" do
-        account_hold_user_with_no_purchases.find_coupon("1").should be_nil
-      end
-    end
-  end
-
-  describe "#find_purchase" do
-    before do
-      Dupe.create :purchase, :id => 1, :user_id => 3
-    end
-
-    context "return purchase successfully" do
-      it "get the user's purchase" do
-        purchase = Purchase.find(1)
-        account_hold_user_with_purchases.find_purchase("1").should == purchase
-      end
-    end
-
-    context "return purchase unsuccessfully" do
-      it "return nil with incrrect parameter" do
-        account_hold_user_with_no_purchases.find_purchase("valid").should be_nil
-      end
-
-      it "return nil with the no_purchases user" do
-        account_hold_user_with_no_purchases.find_purchase("1").should be_nil
-      end
-    end
-  end
-
-  describe ".email_token_subscribe?" do
-    before do
-      Dupe.create :subscription, :id => 5, :user_id => 3, :zip=>'80202', :status => "active", :region_id => "denver", :region_name =>'Denver'
-      Dupe.create :email, :id => "1", :user_id => 3, :to_user_id => 3
-    end
-
-    context "user have subscribed the region" do
-      it "should return ture" do
-        User.email_token_subscribe?("1","denver").should be_true
-      end
-    end
-
-    context "user have not subscribed the region" do
-      it "should return false" do
-        User.email_token_subscribe?("1","san-francisco").should be_false
-      end
-    end
-  end
-
-  describe ".from_email_token" do
-    let (:first_email) { double(:email, :id => "1", :user_id => 1, :to_user_id => 1) }
-    let (:second_email) { double(:email, :id => "2", :user_id => nil, :to_user_id => nil, :to => 'foo@bar.com') }
-    let (:third_email) { double(:email, :id => "3", :user_id => nil, :to_user_id => nil, :to => nil) }
-
-    it "returns nil when we cannot find the email" do
-      Email.stub(:find).and_return(nil)
-      user = User.from_email_token "0"
-      expect(user).to be_nil
-    end
-
-    it "returns user for email with 'to_user_id' field" do
-      Email.stub(:find).and_return(first_email)
-      User.should_receive(:find)
-      User.from_email_token "1"
-    end
-
-    it "returns user for email with 'to' field" do
-      Email.stub(:find).and_return(second_email)
-      User.stub_chain(:find_by_email, :first)
-      User.should_receive(:find_by_email)
-      User.from_email_token "2"
-    end
-
-    it "returns nil with 'to' and 'to_user_id' fields that don't resolve to a user" do
-      Email.stub(:find).and_return(third_email)
-      user = User.from_email_token "3"
-      expect(user).to be_nil
-    end
-  end
-
-  describe "#active_subscriptions" do
-    before do
-      Dupe.create :subscription, :id => 5, :user_id => 3, :zip=>'80202', :status => "active", :region_id => "denver", :region_name =>'Denver'
-    end
-
-    context "user have active_subscriptions" do
-      it "should get user's active_subscriptions" do
-        subscription = Subscription.find(5)
-        account_hold_user_with_purchases.active_subscriptions.should == [subscription]
-      end
-    end
-
-    context "user have not active_subscriptions" do
-      it "should retrun []" do
-        account_hold_user_with_no_purchases.active_subscriptions.should == []
-      end
-    end
-  end
-
-  describe "#best_name" do
-    context "user with a full_name" do
-      it "should get the user's full_name" do
-        account_hold_user_with_purchases.best_name.should == "foo bar"
-      end
-    end
-
-    context "user without a full_name" do
-      it "should get the user's email" do
-        account_hold_user_with_no_purchases.best_name.should == "account_hold_user_with_no_purchases@qq.com"
-      end
-    end
-  end
-
-  describe "#reset_password" do
-    let(:params) {
-      {
-      token: 'token',
-      pass: 'password',
-      pass_confirmation: "password confirmation"
-    }
-    }
-    it "sends PUT to /users/:id/reset_password.json" do
-      user = Galaxy::User.new(:id => "d02k49d")
-      mock_galaxy(:put, "/api/v2/users/d02k49d/reset_password.json?pass=password&pass_confirmation=password&token=token", post_headers, http_ok, 200)
-      response = user.reset_password("token", "password", "password")
-      response.body[:status] == 'success'
-    end
-  end
-
-  describe "#blacklist" do
-    it "sends PUT to /users/:id/blacklist.json" do
-      user = Galaxy::User.new(:id => "d02k49d")
-      mock_galaxy(:put, "/api/v2/users/#{user.id}/blacklist.json", post_headers, http_ok, 200)
-      response = user.blacklist
-      response.body[:status] == 'success'
-    end
-  end
-
-  describe "#unique_subscriptions_by_region" do
-    it "return unique subscriptions by its region" do
-      denver = double(:subscription, :region_id => "denver")
-      san_francisco = double(:subscription, :region_id => "san-francisco")
-      subscribed_user.stub(:subscriptions => [denver, denver, san_francisco])
-      subscribed_user.unique_subscriptions_by_region.should eq([denver, san_francisco])
-    end
-  end
-
-
-  describe "#valid_coupons_for_purchase" do
-    before do
-      Dupe.create :coupon, :id => 1, :user_id => 3, :purchase_id => 1
-      Dupe.create :purchase, :id => 1, :user_id => 3
-    end
-
-    context "return coupons successfully" do
-      it "should get the user's valid coupons" do
-        coupon = Coupon.find(1)
-        account_hold_user_with_purchases.valid_coupons_for_purchase("1").should == [coupon]
-      end
-    end
-
-    context "return coupons unsuccessfully" do
-      it "should return [] with incrrect parameter" do
-        account_hold_user_with_purchases.valid_coupons_for_purchase("incrrect").should == []
-      end
-
-      it "should return [] if the user have not valid coupons" do
-        account_hold_user_with_no_purchases.valid_coupons_for_purchase("1").should == []
-      end
-    end
-  end
-
-  describe "#active_coupons" do
-    before do
-      Dupe.create :coupon, :id => 1, :user_id => 3, :purchase_id => 1
-    end
-
-    context "user have active_coupons" do
-      it "should get the active_coupons" do
-        coupon = Coupon.find(1)
-        account_hold_user_with_purchases.active_coupons.should == [coupon]
-      end
-    end
-
-    context "user have not active_coupons" do
-      it "should get the active_coupons as nil if user have not coupons" do
-        account_hold_user_with_no_purchases.active_coupons.should == []
-      end
-    end
-  end
-
 end

@@ -27,6 +27,10 @@ module Galaxy
     def expired?
       soldout? or ended?
     end
+    # which one?
+    # def expired?
+    #   soldout? or expires_at and expires_at <= Time.zone.now
+    # end
 
     def time_left
       Time.now - end_at
@@ -121,7 +125,7 @@ module Galaxy
     end
 
     def card_linked?
-      self.type == "card-linked"
+      type == "card-linked"
     end
 
     def purchasable?(user=nil)
@@ -130,16 +134,12 @@ module Galaxy
 
     def max_purchasable(user)
       num_already_purchased = user ? user.num_already_purchased(self) : 0
-      [self.purchasable_number, (self.max_per_user || 10) - num_already_purchased].min
+      [self.purchasable_number, (self.max_per_user || 10) - num_already_purchased].compact.min
     end
-
-    def max_purchasable_per_transaction(user=nil)
-      num_already_purchased = (user && user.active_purchases.map { |x| x.deal_id == id ? x.num_bought : 0}.reduce(:+)) || 0
-      [purchasable_number, (max_per_user || 10) - num_already_purchased].min
-    end
+    alias :max_purchasable_per_transaction :max_purchasable
 
     def in_flight?
-      self.workflow_state == 'in-flight'
+      state == 'in-flight'
     end
 
     def approved?
@@ -152,10 +152,6 @@ module Galaxy
 
     def buyable?(user=nil)
       started? && !expired? && in_flight? && max_purchasable(user) > 0
-    end
-
-    def show_closed_at
-      ended? ? end_at : 1.day.ago.in_time_zone(self.region.timezone).end_of_day
     end
 
     def instructions?
@@ -183,8 +179,7 @@ module Galaxy
     #TODO: remove after consumer web deploy has updated to only user last_purchase
     def last_purchase_for_user(user)
       return nil unless user
-      p = user.purchases.select { |x| x.deal_id == id }
-      p.sort { |x, y| y.created_at <=> x.created_at}.first
+      last_purchase({:user => user})
     end
 
     def external_purchase_url?
@@ -220,10 +215,6 @@ module Galaxy
       merchant.try(:website)
     end
 
-    def merchant_addresses
-      self.eager_locations.map{|x| x[:address]}.compact
-    end
-
     def region_name
       self.region.try(:name)
     end
@@ -235,5 +226,6 @@ module Galaxy
     def addresses
       self.locations.map{|x| x.readable_address}
     end
+    alias :merchant_addresses :addresses
   end
 end

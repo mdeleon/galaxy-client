@@ -3,7 +3,7 @@ require "galaxy/category_preference"
 
 module Galaxy
   describe CategoryPreference do
-    subject { CategoryPreference.new({:user_id => "user-slug", :id => "category-slug"}, true) }
+    subject { Galaxy::CategoryPreference.new({:user_id => "user-slug", :id => "category-slug"}, true) }
 
     describe "#destroy" do
       it "should send a DELETE request to /api/v2/users/:user_id/category_preferences/:id" do

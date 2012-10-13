@@ -201,9 +201,18 @@ module Galaxy
     alias :image_url_abs :image_url
 
     def image(size="medium")
-      images.select{|x| x.has_key(size)}.first
-    end
+      return if images.blank?
 
+      #use attributes to avoid ActiveResource automapping to Deal::IMage
+      # Maybe this is just a DUPE THING?
+      img = images.select{|x| x.attributes.has_key?(size)}.first.send(size.to_sym)
+      if img.present?
+        img.attributes
+      else
+        default = images.first.attributes
+        default[default.keys.first].attributes
+      end
+    end
 
     def merchant_name
       merchant.try(:name)

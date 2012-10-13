@@ -35,5 +35,9 @@ module Galaxy
     def pause
       put(:pause)
     end
+
+    def modifiable?
+      true
+    end
   end
 end

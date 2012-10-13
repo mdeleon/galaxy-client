@@ -12,6 +12,7 @@ module Galaxy
     has_many :purchases
     has_many :saved_deals
     has_many :card_links
+    has_many :coupons
     has_many :category_preferences
 
     def best_name
@@ -187,26 +188,17 @@ module Galaxy
       update_subscriptions_status(sub.region_id, "active").find{ |s| s.id.to_s == sub.id.to_s } || sub
     end
 
-    def subscribe_by_zip(zip)
-      unless sub = subscriptions.find { |s| s.zip == zip }
-        sub = Subscription.create!(:user_id => id, :zip => zip)
-        # set subscriptions to nil for clear the cache of galaxy-client
-        @subscriptions = nil
-        if sub.region_less? || subscriptions.select { |s| s.region_id == sub.region_id }.size > 1
-          Email.account_change(id)
-        end
-      end
-
-      update_subscriptions_status(sub.region_id, "active").find{ |s| s.id.to_s == sub.id.to_s } || sub
-    end
 
     # return a list of updated subscriptions
     def update_subscriptions_status(region_id, status)
+      puts subscriptions.inspect
       subs_need_update = subscriptions.select { |sub| sub.status != status && sub.region_id == region_id  && sub.modifiable?}
       subs_need_update.each do |sub|
         sub.status = status
         sub.save!
       end
+      puts id
+      puts subs_need_update.size > 0
       Email.account_change(id) if subs_need_update.size > 0
       subs_need_update
     end

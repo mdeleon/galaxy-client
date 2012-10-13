@@ -37,7 +37,7 @@ module Galaxy
         def #{resource}(params={})
           params = params.merge(#{default_params})
 
-          @#{resource} ||= if self.attributes.has_key?(:#{resource})
+          @#{resource} ||= if self.attributes[:#{resource}].present?
             self.#{resource_path}.map{ |r| model_for(:#{resource_type}).new(r) }
           else
             model_for(:#{resource_type}).find(
@@ -60,9 +60,9 @@ module Galaxy
       class_eval(%Q[
         def #{resource}(params={})
           params = params.merge(#{default_params})
-          @#{resource} ||= if self.attributes.has_key?(:#{resource})
+          @#{resource} ||= if self.attributes[:#{resource}].present?
             model_for(:#{resource_type}).new(self.#{resource})
-          elsif self.respond_to?(:#{resource_key})
+          elsif self.attributes[:#{resource_key}].present?
             model_for(:#{resource_type}).find(#{resource_key}, :params => params)
           else
             puts 'what?!'

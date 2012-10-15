@@ -77,13 +77,17 @@ module Galaxy
       ])
     end
 
+    def self.model_key
+      self.to_s.demodulize
+    end
+
     def self.init_default_params(resource, opts)
-      @@default_params ||= {}; @@default_params[self.to_s] ||= {}
-      @@default_params[self.to_s][resource.to_sym] = opts.delete(:default_params) || {}
+      @@default_params ||= {}; @@default_params[model_key] ||= {}
+      @@default_params[self.to_s.demodulize][resource.to_sym] = opts.delete(:default_params) || {}
     end
 
     def default_params(resource_name)
-      param = @@default_params[self.class.to_s][resource_name.to_sym]
+      param = @@default_params[self.class.model_key][resource_name.to_sym]
       param.respond_to?(:call) ?  param.call(self) : param
     end
 

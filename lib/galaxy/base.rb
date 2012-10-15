@@ -26,10 +26,11 @@ module Galaxy
 
     def self.has_many(resource, opts={})
       resource_name = resource.to_s
-      resource_path = resource_name.demodulize.underscore.pluralize
+      resource_path = resource_name.demodulize.underscore
       resource_type = (opts[:class].presence || resource_name).to_s.demodulize.underscore.singularize
       klass_path    = self.to_s.demodulize.underscore.pluralize
-      select        = opts[:select] || "all"
+      quantity_select = opts[:select] || "all"
+      resource_path = resource_path.pluralize if quantity_select == "all"
 
       init_default_params(resource, opts)
 
@@ -42,7 +43,7 @@ module Galaxy
             self.attributes[:#{resource_name}].map{|r| model_for(:#{resource_type}).new(r.attributes)}
           else
             model_for(:#{resource_type}).find(
-              :#{select},
+              :#{quantity_select},
               :from => "/\#{self.class.path}/#{klass_path}/\#{self.id}/#{resource_path}.json",
               :params => params)
           end

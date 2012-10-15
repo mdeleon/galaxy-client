@@ -25,23 +25,24 @@ module Galaxy
     end
 
     def self.has_many(resource, opts={})
-      resource      = resource.to_s
+      resource_name = resource.to_s
+      resource_path = resource_name.demodulize.underscore.pluralize
+      resource_type = (opts[:class].presence || resource_name).to_s.demodulize.underscore.singularize
       klass_path    = self.to_s.demodulize.underscore.pluralize
-      resource_path = (opts[:class].to_s.presence || resource).pluralize
-      resource_type = resource_path.singularize
+      select        = opts[:select] || "all"
 
-      default_params = opts.delete(:default_params) || {}
-      default_params = default_params.call if default_params.respond_to?(:call)
+      init_default_params(resource, opts)
 
       class_eval( %Q[
-        def #{resource}(params={})
-          params = params.merge(#{default_params})
+        def #{resource_name}(params={})
+          return unless self.id.present?
+          params = params.merge(default_params(:#{resource_name}))
 
-          @#{resource} ||= if self.attributes[:#{resource}].present?
-            self.#{resource_path}.map{ |r| model_for(:#{resource_type}).new(r) }
+          @#{resource_name} ||= if self.attributes[:#{resource_name}].present?
+            self.attributes[:#{resource_name}].map{|r| model_for(:#{resource_type}).new(r.attributes)}
           else
             model_for(:#{resource_type}).find(
-              :all,
+              :#{select},
               :from => "/\#{self.class.path}/#{klass_path}/\#{self.id}/#{resource_path}.json",
               :params => params)
           end
@@ -49,27 +50,40 @@ module Galaxy
       ])
     end
 
-    def self.belongs_to(resource, opts={})
-      resource = resource.to_s
-      resource_key = "#{resource}_id"
-      resource_type = (opts[:class].presence || resource).to_s.demodulize.underscore
+    def self.has_one(resource, opts={})
+      has_many(resource, opts.merge(:select => 'one'))
+    end
 
-      default_params = opts.delete(:default_params) || {}
-      default_params.call if default_params.respond_to?(:call)
+    def self.belongs_to(resource, opts={})
+      resource_name = resource.to_s
+      resource_key = "#{resource}_id"
+      resource_type = (opts[:class].presence || resource_name).to_s.demodulize.underscore
+      init_default_params(resource, opts)
 
       class_eval(%Q[
-        def #{resource}(params={})
-          params = params.merge(#{default_params})
-          @#{resource} ||= if self.attributes[:#{resource}].present?
-            model_for(:#{resource_type}).new(self.#{resource})
+        def #{resource_name}(params={})
+          return unless self.id.present?
+          params = params.merge(default_params(:#{resource_name}))
+
+          @#{resource_name} ||= if self.attributes[:#{resource_name}].present?
+            model_for(:#{resource_type}).new(self.attributes[:#{resource_name}].attributes)
           elsif self.attributes[:#{resource_key}].present?
             model_for(:#{resource_type}).find(#{resource_key}, :params => params)
           else
-            puts 'what?!'
-            model_for(:#{resource_type}).new(get(:#{resource}), :params => params)
+            raise "missing resource key #{resource_key}"
           end
         end
       ])
+    end
+
+    def self.init_default_params(resource, opts)
+      @@default_params ||= {}; @@default_params[self.to_s] ||= {}
+      @@default_params[self.to_s][resource.to_sym] = opts.delete(:default_params) || {}
+    end
+
+    def default_params(resource_name)
+      param = @@default_params[self.class.to_s][resource_name.to_sym]
+      param.respond_to?(:call) ?  param.call(self) : param
     end
 
     # This method takes a galaxy client model name and returns the corresponding model class

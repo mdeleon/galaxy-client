@@ -3,6 +3,7 @@ require "galaxy/location"
 
 describe Galaxy::Location do
   subject { Galaxy::Location.new :created_at => nil,
+                                 :id => 1,
                                  :address_id => nil}
 
   it_timeifies :created_at

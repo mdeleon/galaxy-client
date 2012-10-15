@@ -1,7 +1,7 @@
 module Galaxy
   class Region < Galaxy::Base
 
-    belongs_to :current_deal, :class => Deal
+    has_one  :current_deal, :class => Deal
     has_many :from_ip, :class => Region
     has_many :deals
 

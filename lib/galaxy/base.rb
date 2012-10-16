@@ -32,24 +32,35 @@ module Galaxy
       quantity_select = opts[:select] || "all"
       resource_path = resource_path.pluralize if quantity_select == "all"
 
-      init_default_association_params(resource, opts)
+      default_params_hash_or_proc = opts[:default_params] || {}
 
-      class_eval( %Q[
-        def #{resource_name}(params={})
-          return unless self.id.present?
-          params = params.merge(default_association_params_for(:#{resource_name}))
+      define_method resource_name do |params={ }|
+        return unless self.id.present?
 
-          @#{resource_name} ||= if self.attributes[:#{resource_name}].present?
-            self.attributes[:#{resource_name}].map{|r| model_for(:#{resource_type}).new(r.attributes)}
-          else
-            model_for(:#{resource_type}).find(
-              :#{quantity_select},
-              :from => "/\#{self.class.path}/#{klass_path}/\#{self.id}/#{resource_path}.json",
-              :params => params)
-          end
+        default_params_hash = if default_params_hash_or_proc.respond_to?(:call)
+                                default_params_hash_or_proc.call(self)
+                              else
+                                default_params_hash_or_proc
+                              end
+
+        params = params.merge(default_params_hash)
+
+        retval = instance_variable_get("@#{resource_name}")
+        unless retval
+          retval = if self.attributes[resource_name.to_sym].present?
+                     self.attributes[resource_name.to_sym].map { |r| model_for(resource_type.to_sym).new(r.attributes) }
+                   else
+                     model_for(resource_type.to_sym).find(
+                       quantity_select.to_sym,
+                       :from   => "/#{self.class.path}/#{klass_path}/#{self.id}/#{resource_path}.json",
+                       :params => params)
+                   end
+          instance_variable_set("@#{resource_name}", retval)
         end
-      ])
+        retval
+      end
     end
+
 
     def self.has_one(resource, opts={})
       has_many(resource, opts.merge(:select => 'one'))
@@ -59,36 +70,36 @@ module Galaxy
       resource_name = resource.to_s
       resource_key = "#{resource}_id"
       resource_type = (opts[:class].presence || resource_name).to_s.demodulize.underscore
-      init_default_association_params(resource, opts)
 
-      class_eval(%Q[
-        def #{resource_name}(params={})
-          return unless self.id.present?
-          params = params.merge(default_association_params_for(:#{resource_name}))
+      default_params_hash_or_proc = opts[:default_params] || {}
 
-          @#{resource_name} ||= if self.attributes[:#{resource_name}].present?
-            model_for(:#{resource_type}).new(self.attributes[:#{resource_name}].attributes)
-          elsif self.attributes[:#{resource_key}].present?
-            model_for(:#{resource_type}).find(#{resource_key}, :params => params)
-          else
-            raise "missing resource key #{resource_key}"
-          end
+      define_method resource_name do |params={ }|
+        return unless self.id.present?
+
+        default_params_hash = if default_params_hash_or_proc.respond_to?(:call)
+                                default_params_hash_or_proc.call(self)
+                              else
+                                default_params_hash_or_proc
+                              end
+
+        params = params.merge(default_params_hash)
+
+        retval = instance_variable_get("@#{resource_name}")
+        unless retval
+          retval = if self.attributes[resource_name.to_sym].present?
+                     model_for(resource_type.to_sym).new(self.attributes[resource_name.to_sym].attributes)
+                   elsif self.attributes[resource_key.to_sym].present?
+                     model_for(resource_type.to_sym).find(resource_key.to_sym, :params => params)
+                   else
+                     raise "missing resource key #{resource_key}"
+                   end
         end
-      ])
+        retval
+      end
     end
 
     def self.model_key
       self.to_s.demodulize
-    end
-
-    def self.init_default_association_params(resource, opts)
-      @@default_association_params ||= {}; @@default_association_params[model_key] ||= {}
-      @@default_association_params[self.to_s.demodulize][resource.to_sym] = opts.delete(:default_params) || {}
-    end
-
-    def default_association_params_for(resource_name)
-      param = @@default_association_params[self.class.model_key][resource_name.to_sym]
-      param.respond_to?(:call) ?  param.call(self) : param
     end
 
     # This method takes a galaxy client model name and returns the corresponding model class

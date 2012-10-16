@@ -161,10 +161,6 @@ module Galaxy
       has_firstname? && has_lastname?
     end
 
-    def has_passwd
-      pass.present?
-    end
-
     def has_subscribed?(region_id)
       !!(subscriptions.find {|s| s.region_id == region_id && s.active? })
     end

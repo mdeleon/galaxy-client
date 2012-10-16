@@ -65,20 +65,22 @@ module Galaxy
       resource_type = (opts[:class].presence || resource_name).to_s.demodulize.underscore
       init_default_params(resource, opts)
 
-      class_eval(%Q[
-        def #{resource_name}(params={})
-          return unless self.id.present?
-          params = params.merge(default_params(:#{resource_name}))
+      define_method resource_name do |params={ }|
+        return unless self.id.present?
+        params = params.merge(default_params(resource_name.to_sym))
 
-          @#{resource_name} ||= if self.attributes[:#{resource_name}].present?
-            model_for(:#{resource_type}).new(self.attributes[:#{resource_name}].attributes)
-          elsif self.attributes[:#{resource_key}].present?
-            model_for(:#{resource_type}).find(#{resource_key}, :params => params)
-          else
-            raise "missing resource key #{resource_key}"
-          end
+        retval = instance_variable_get("@#{resource_name}")
+        unless retval
+          retval = if self.attributes[resource_name.to_sym].present?
+                     model_for(resource_type.to_sym).new(self.attributes[resource_name.to_sym].attributes)
+                   elsif self.attributes[resource_key.to_sym].present?
+                     model_for(resource_type.to_sym).find(resource_key.to_sym, :params => params)
+                   else
+                     raise "missing resource key #{resource_key}"
+                   end
         end
-      ])
+        retval
+      end
     end
 
     def self.model_key

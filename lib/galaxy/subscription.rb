@@ -16,12 +16,14 @@ module Galaxy
       respond_to?(:region_id) && region_id.present?
     end
 
-    def subscribe
-      put(:subscribe)
+    def unsubscribe
+      self.status = "inactive"
+      save!
     end
 
-    def unsubscribe
-      put(:unsubscribe)
+    def subscribe
+      self.status = "active"
+      save!
     end
 
     def active?

@@ -81,14 +81,13 @@ describe Galaxy::Deal do
       subject.should be_expired
     end
 
-    it "a ended deal should be expired" do
-      subject.stub(:ended? => true, :soldout => false)
+    it "an expired deal should be expired" do
+      subject.stub(:expires_at => 5.minutes.ago, :soldout => false)
       subject.should be_expired
-      subject.should be_ended
     end
 
     it "a not ended and not soldout deal should not be expired" do
-      subject.stub(:ended => false, :soldout => false)
+      subject.stub(:expires_at => 5.minutes.from_now, :soldout => false)
       subject.should_not be_expired
     end
   end
@@ -117,24 +116,6 @@ describe Galaxy::Deal do
     # end
   end
 
-  describe "#calculate_cost" do
-    let(:user) {double(:user, :credits => 10000)}
-    before {subject.stub(:price => 5000)}
-
-    context "user has credit" do
-      it "should return cost" do
-        subject.calculate_cost(user, 5).should == [10000, 25000, 15000]
-      end
-    end
-
-    context "user has not credit" do
-      it "should return cost" do
-        user.stub(:credits => 0)
-        subject.calculate_cost(user, 5).should == [0, 25000, 25000]
-      end
-    end
-  end
-
   describe "#card_linked?" do
     context "when the type is card-linked" do
       it "is card_linked" do
@@ -148,19 +129,6 @@ describe Galaxy::Deal do
         subject.type = "starange thing"
         expect(subject).not_to be_card_linked
       end
-    end
-  end
-
-  describe "#secondary_deals" do
-    it "sends GET to /deals/:id/secondary_deals.json" do
-      secondary_deals = [{ :id => "some deal" }]
-      deal = Galaxy::Deal.new(:id => "d02k49d")
-      mock_galaxy(:get, "/api/v2/deals/#{deal.id}/secondary_deals.json", get_headers, { :deals => secondary_deals }.to_json, 200)
-
-      response = deal.secondary_deals
-      response.should be_instance_of(Array)
-      response.first.should be_instance_of(Galaxy::Deal)
-      response.first.id.should == "some deal"
     end
   end
 
@@ -223,7 +191,7 @@ describe Galaxy::Deal do
 
   describe "#buyable?" do
     it "a started and not expired and approved deal can be bought" do
-      subject.stub(:start_at => 3.days.ago, :expired? => false, :in_flight? => true, :max_purchasable => 3)
+      subject.stub(:expired? => false, :in_flight? => true, :max_purchasable => 3)
       subject.should be_buyable
     end
 
@@ -245,13 +213,6 @@ describe Galaxy::Deal do
     it "a unapproved deal can not be bought" do
       subject.stub(:start_at => 3.days.ago, :expired? => false, :in_flight? => false, )
       subject.should_not be_approved
-    end
-  end
-
-  describe "#product_name" do
-    it "show deal title" do
-      subject.should_receive(:title).and_return nil
-      subject.product_name
     end
   end
 
@@ -291,15 +252,17 @@ describe Galaxy::Deal do
 
     context "#last_purchase" do
       specify {subject.last_purchase == deal_purchase}
-    end
 
-    context "last_purchase_for_user" do
-      it "should be nil if no user" do
-        subject.last_purchase_for_user(nil).should be nil
+      context 'with nil' do
+        it "should be last purchase" do
+          subject.last_purchase(nil).should eq(deal_purchase)
+        end
       end
 
-      it "should be last_purchase for the user" do
-        subject.last_purchase_for_user(user).should == user_purchase
+      context 'with a user' do
+        it "should be last_purchase for the user" do
+          subject.last_purchase(:user => user).should == user_purchase
+        end
       end
     end
   end

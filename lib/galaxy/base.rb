@@ -32,12 +32,12 @@ module Galaxy
       quantity_select = opts[:select] || "all"
       resource_path = resource_path.pluralize if quantity_select == "all"
 
-      init_default_params(resource, opts)
+      init_default_association_params(resource, opts)
 
       class_eval( %Q[
         def #{resource_name}(params={})
           return unless self.id.present?
-          params = params.merge(default_params(:#{resource_name}))
+          params = params.merge(default_association_params_for(:#{resource_name}))
 
           @#{resource_name} ||= if self.attributes[:#{resource_name}].present?
             self.attributes[:#{resource_name}].map{|r| model_for(:#{resource_type}).new(r.attributes)}
@@ -59,12 +59,12 @@ module Galaxy
       resource_name = resource.to_s
       resource_key = "#{resource}_id"
       resource_type = (opts[:class].presence || resource_name).to_s.demodulize.underscore
-      init_default_params(resource, opts)
+      init_default_association_params(resource, opts)
 
       class_eval(%Q[
         def #{resource_name}(params={})
           return unless self.id.present?
-          params = params.merge(default_params(:#{resource_name}))
+          params = params.merge(default_association_params_for(:#{resource_name}))
 
           @#{resource_name} ||= if self.attributes[:#{resource_name}].present?
             model_for(:#{resource_type}).new(self.attributes[:#{resource_name}].attributes)
@@ -81,13 +81,13 @@ module Galaxy
       self.to_s.demodulize
     end
 
-    def self.init_default_params(resource, opts)
-      @@default_params ||= {}; @@default_params[model_key] ||= {}
-      @@default_params[self.to_s.demodulize][resource.to_sym] = opts.delete(:default_params) || {}
+    def self.init_default_association_params(resource, opts)
+      @@default_association_params ||= {}; @@default_association_params[model_key] ||= {}
+      @@default_association_params[self.to_s.demodulize][resource.to_sym] = opts.delete(:default_params) || {}
     end
 
-    def default_params(resource_name)
-      param = @@default_params[self.class.model_key][resource_name.to_sym]
+    def default_association_params_for(resource_name)
+      param = @@default_association_params[self.class.model_key][resource_name.to_sym]
       param.respond_to?(:call) ?  param.call(self) : param
     end
 

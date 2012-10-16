@@ -4,106 +4,8 @@ module Galaxy
 
     has_many :purchases
     has_many :locations
-    has_many :secondary_deals, :class => Deal
     belongs_to  :merchant
     belongs_to  :region
-
-    # TODO: remove after updating conumser web to user :user_id as param instead of user as param
-    def secondary_deals(user=nil, params={})
-      user && params.merge(:user_id => user.id)
-      get(:secondary_deals, params).map { |attrs| model_for(:deal).new(attrs) }
-    end
-
-    def started?
-      !!(start_at && start_at <= Time.now)
-    end
-
-    def running?
-      started? and !ended?
-    end
-
-    def expired?
-      soldout? or ended?
-    end
-    # which one?
-    # def expired?
-    #   soldout? or expires_at and expires_at <= Time.zone.now
-    # end
-
-    def time_left
-      Time.now - end_at
-    end
-
-    def soldout?
-      soldout
-    end
-
-    def discount
-      value - price
-    end
-
-    def hide_addresses?
-      hide_addresses
-    end
-
-    def show_map?
-      show_map
-    end
-
-    def product_name
-      title
-    end
-
-    def highlights
-      super || ""
-    end
-
-    def time_left_hash
-      remaining_time = time_left.round
-      total = remaining_time
-      days = remaining_time / 1.day
-      hours = (remaining_time -= days.days) / 1.hour
-      minutes = (remaining_time -= hours.hours) / 1.minute
-      seconds = (remaining_time -= minutes.minutes) / 1.second
-      {
-        days: days,
-        hours: hours,
-        minutes: minutes,
-        seconds: seconds,
-        total: total
-      }
-    end
-
-    def calculate_cost(user, qty)
-      if user and user.credits > 0
-        subtotal = price * qty
-        credit = [subtotal, user.credits].min
-        total = subtotal - credit
-      else
-        credit = 0
-        subtotal = price * qty
-        total = subtotal
-      end
-
-      [credit, subtotal, total]
-    end
-
-    def starting_price
-      price
-    end
-
-    def discount_percentage
-      discount.to_f/value.to_f*100
-    end
-
-    def number_sold
-      num_purchased
-    end
-
-    def ended?
-      end_at and self.end_at < Time.now
-    end
-    alias :ended :ended?
 
     def self.find_by_regions(region_ids, user = nil)
       in_flight_deals = []
@@ -122,40 +24,59 @@ module Galaxy
       in_flight_deals.sort_by { |deal| deal.start_at.to_i*-1 }
     end
 
+    def started?
+      !!(start_at && start_at <= Time.now)
+    end
+
+    def running?
+      started? and !ended?
+    end
+
+    def time_left
+      Time.now - end_at
+    end
+
+    def soldout?
+      soldout
+    end
+    alias :sold_out? :soldout?
+
+    def discount
+      value - price
+    end
+
+    def expired?
+      soldout? || (self.expires_at and self.expires_at <= Time.now)
+    end
+
+    def hide_addresses?
+      hide_addresses
+    end
+
+    def show_map?
+      show_map
+    end
+
+    def highlights
+      super || ""
+    end
+
+    def discount_percentage
+      discount.to_f/value.to_f*100
+    end
+
+    def ended?
+      end_at and self.end_at < Time.now
+    end
+    alias :ended :ended?
+
     def card_linked?
       type == "card-linked"
     end
 
-    def purchasable?(user=nil)
-      max_purchasable_per_transaction(user) > 0
-    end
-
-    def max_purchasable(user)
-      num_already_purchased = user ? user.num_already_purchased(self) : 0
-      [self.purchasable_number, (self.max_per_user || 10) - num_already_purchased].compact.min
-    end
-    alias :max_purchasable_per_transaction :max_purchasable
-
     def in_flight?
       state == 'in-flight'
     end
-
-    def approved?
-      %w[ approved in-flight landed ].include? state
-    end
-
-    def expiry(timezone = region.timezone)
-      expiry_as_of_now ? expiry_as_of_now.in_time_zone(timezone) : nil
-    end
-
-    def buyable?(user=nil)
-      started? && !expired? && in_flight? && max_purchasable(user) > 0
-    end
-
-    def instructions?
-      !instructions.blank?
-    end
-    alias :has_instructions? :instructions?
 
     def redemption_coded?
       fulfillment_method == "redemptioncoded"
@@ -169,50 +90,20 @@ module Galaxy
       fulfillment_method == 'shipped'
     end
 
-    def last_purchase(opts={})
-      p = opts[:user] ? opts[:user].purchases : purchases
-      p.select{ |x| x.deal_id == id }.sort{ |x, y| y.created_at <=> x.created_at}.first
+    def approved?
+      %w[ approved in-flight landed ].include? state
     end
 
-    #TODO: remove after consumer web deploy has updated to only user last_purchase
-    def last_purchase_for_user(user)
-      return nil unless user
-      last_purchase({:user => user})
+    def timezone
+      region.timezone
+    end
+
+    def national?
+      region.id == 'united-states'
     end
 
     def external_purchase_url?
       !external_purchase_url.blank?
-    end
-
-    # Helper method to ensure custom_data returns a hash of attributes instead of a CustomData object.
-    # @return [Hash]
-    #   The hash corresponding to the custom data fields.
-    def custom_data
-      super.attributes
-    end
-
-    def ended
-      Time.now > self.end_at
-    end
-
-    def image_url(size="medium")
-      i = image(size) and i[:url]
-    end
-    alias :image_url_abs :image_url
-
-    def image(size="medium")
-      return if images.blank?
-      size ||= "medium"
-
-      #use attributes to avoid ActiveResource automapping to Deal::IMage
-      # Maybe this is just a DUPE THING?
-      img = images.select{|x| x.attributes.has_key?(size)}.first.send(size.to_sym)
-      if img.present?
-        img.attributes
-      else
-        default = images.first.attributes
-        default[default.keys.first].attributes
-      end
     end
 
     def merchant_name
@@ -236,14 +127,74 @@ module Galaxy
     end
     alias :merchant_addresses :addresses
 
-    #Helper method
-    def timezone
-      region.timezone
+    def instructions?
+      !instructions.blank?
+    end
+    alias :has_instructions? :instructions?
+
+    def time_left_hash
+      remaining_time = time_left.round
+      total = remaining_time
+      days = remaining_time / 1.day
+      hours = (remaining_time -= days.days) / 1.hour
+      minutes = (remaining_time -= hours.hours) / 1.minute
+      seconds = (remaining_time -= minutes.minutes) / 1.second
+      {
+        days: days,
+        hours: hours,
+        minutes: minutes,
+        seconds: seconds,
+        total: total
+      }
     end
 
-    # Helper method
-    def national?
-      region.id == 'united-states'
+    def purchasable?(user=nil)
+      user ? (max_purchasable(user) > 0) : !soldout
+    end
+
+    def max_purchasable(user=nil)
+      num_already_purchased = user ? user.num_already_purchased(self) : 0
+      [self.num_left, (self.max_per_user || 10) - num_already_purchased].compact.min
+    end
+
+    def expiry(timezone = region.timezone)
+      expiry_as_of_now ? expiry_as_of_now.in_time_zone(timezone) : nil
+    end
+
+    def buyable?(user=nil)
+      !expired? && in_flight? && max_purchasable(user) > 0
+    end
+
+    def last_purchase(opts={})
+      opts ||= {}
+      p = opts[:user] ? opts[:user].purchases : purchases
+      p.select{ |x| x.deal_id == id }.sort{ |x, y| y.created_at <=> x.created_at}.first
+    end
+
+    # Helper method to ensure custom_data returns a hash of attributes instead of a CustomData object.
+    # @return [Hash]
+    #   The hash corresponding to the custom data fields.
+    def custom_data
+      super.attributes
+    end
+
+    def image_url(size="medium")
+      i = image(size) and i[:url]
+    end
+
+    def image(size="medium")
+      return if images.blank?
+      size ||= "medium"
+
+      #use attributes to avoid ActiveResource automapping to Deal::IMage
+      # Maybe this is just a DUPE THING?
+      img = images.select{|x| x.attributes.has_key?(size)}.first.send(size.to_sym)
+      if img.present?
+        img.attributes
+      else
+        default = images.first.attributes
+        default[default.keys.first].attributes
+      end
     end
   end
 end

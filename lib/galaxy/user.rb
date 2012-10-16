@@ -15,14 +15,6 @@ module Galaxy
     has_many :coupons
     has_many :category_preferences
 
-    def best_name
-      full_name.blank? ? email : full_name
-    end
-
-    def full_name
-      "#{self.firstname}#{self.lastname && " #{self.lastname}"}"
-    end
-
     # lockdown schema if we want.
     # self.schema = {'name' => :string, 'age' => :integer, 'token' => :string }
 
@@ -43,18 +35,14 @@ module Galaxy
       # test daily update email might not have to 'to_user_id' field populated, so for now
       # we also inspect the 'to' field to find the user associate with the email
       return User.find(email.to_user_id) if email.to_user_id
-
       return User.find_by_email(email.to).first if email.to
       nil
     end
 
-
-    # @return [Galaxy::User]
     def self.find_by_token(token)
       find(:all, from: "/api/v2/users/find_by_token.json", params: {token: token})
     end
 
-    # @return [Galaxy::User]
     def self.find_by_email(email)
       find(:all, from: "/api/v2/users/find_by_email.json", params: {email: email})
     end
@@ -64,8 +52,6 @@ module Galaxy
       user.unsubscribe_by_region_id(region_id) if user
     end
 
-    # @return [Galaxy::User]
-    #   Return the authenticated user
     def self.authenticate(email, passwd)
       new(get(:authenticate, email: email, pass: passwd), true)
     rescue ActiveResource::ResourceInvalid => e
@@ -99,54 +85,12 @@ module Galaxy
       put(:blacklist)
     end
 
-    def num_already_purchased(deal)
-      active_purchases.map { |x| x.deal_id == deal.id ? x.num_bought : 0}.reduce(&:+) || 0
+    def best_name
+      full_name.blank? ? email : full_name
     end
 
-    def active_purchases
-      purchases.keep_if{|purchase| purchase.active? }
-    end
-
-    def active_coupons
-      coupons.keep_if{|coupon| coupon.active?}.reverse
-    end
-
-    def valid_coupons_for_purchase(purchase_id)
-      purchase = find_purchase(purchase_id)
-      purchase ? purchase.valid_coupons : []
-    end
-
-    def active_subscriptions
-      subscriptions.select { |s| s.active? }.sort{|x,y| y.created_at <=> x.created_at} || []
-    end
-
-    def find_purchase(purchase_id)
-      purchases.find { |purchase| purchase.id.to_s == purchase_id }
-    end
-
-    def find_coupon(coupon_id)
-      coupons.find { |c| c.id.to_s == coupon_id }
-    end
-
-    def unique_subscriptions_by_region
-      subscriptions.uniq_by { |sub| sub.region_id }
-    end
-
-    def regions_not_subscribed_before
-      subscribed_region_ids = subscriptions.collect{|s| s.region_id}.compact.uniq
-      Region.selectable_regions.select{ |r| !subscribed_region_ids.include?(r.id) }
-    end
-
-    def category_active_for?(category)
-      !!category_preferences.try(:any?) { |cp| cp.category_id == category.id }
-    end
-
-    def has_purchased?(deal)
-      if deal.card_linked?
-        card_links.any? { |card_link| card_link.deal_id == deal.id && card_link.state != "unlinked"}
-      else
-        coupons.any? { |coupon| coupon.deal_id == deal.id && coupon.state != "cancelled" }
-      end
+    def full_name
+      "#{self.firstname}#{self.lastname && " #{self.lastname}"}"
     end
 
     def has_firstname?
@@ -161,8 +105,62 @@ module Galaxy
       has_firstname? && has_lastname?
     end
 
+
+    ##======================= PURCHASE STUFF ===============================
+
+    def num_already_purchased(deal)
+      active_purchases.map { |x| x.deal_id == deal.id ? x.num_bought : 0}.reduce(&:+) || 0
+    end
+
+    def active_purchases
+      purchases.keep_if{|purchase| purchase.active? }
+    end
+
+    def has_purchased?(deal)
+      if deal.card_linked?
+        card_links.any? { |card_link| card_link.deal_id == deal.id && card_link.state != "unlinked"}
+      else
+        coupons.any? { |coupon| coupon.deal_id == deal.id && coupon.state != "cancelled" }
+      end
+    end
+
+    def find_purchase(purchase_id)
+      purchases.find { |purchase| purchase.id.to_s == purchase_id }
+    end
+
+    ##======================= COUPON STUFF ===============================
+
+
+    def active_coupons
+      coupons.keep_if{|coupon| coupon.active?}.reverse
+    end
+
+    def valid_coupons_for_purchase(purchase_id)
+      purchase = find_purchase(purchase_id)
+      purchase ? purchase.valid_coupons : []
+    end
+
+    def find_coupon(coupon_id)
+      coupons.find { |c| c.id.to_s == coupon_id }
+    end
+
+    ##======================= SUBSCRIPTION STUFF ===============================
+
+    def active_subscriptions
+      subscriptions.select { |s| s.active? }.sort{|x,y| y.created_at <=> x.created_at} || []
+    end
+
     def has_subscribed?(region_id)
       !!(subscriptions.find {|s| s.region_id == region_id && s.active? })
+    end
+
+    def unique_subscriptions_by_region
+      subscriptions.uniq_by { |sub| sub.region_id }
+    end
+
+    def regions_not_subscribed_before
+      subscribed_region_ids = subscriptions.collect{|s| s.region_id}.compact.uniq
+      Region.selectable_regions.select{ |r| !subscribed_region_ids.include?(r.id) }
     end
 
     def unsubscribe_by_region_id(region_id)
@@ -184,8 +182,6 @@ module Galaxy
       update_subscriptions_status(sub.region_id, "active").find{ |s| s.id.to_s == sub.id.to_s } || sub
     end
 
-
-    # return a list of updated subscriptions
     def update_subscriptions_status(region_id, status)
       puts subscriptions.inspect
       subs_need_update = subscriptions.select { |sub| sub.status != status && sub.region_id == region_id  && sub.modifiable?}
@@ -193,8 +189,6 @@ module Galaxy
         sub.status = status
         sub.save!
       end
-      puts id
-      puts subs_need_update.size > 0
       Email.account_change(id) if subs_need_update.size > 0
       subs_need_update
     end
@@ -253,6 +247,10 @@ module Galaxy
     end
 
     ##========================== SAVED DEAL STUFF   ==================================
+
+    def category_active_for?(category)
+      !!category_preferences.try(:any?) { |cp| cp.category_id == category.id }
+    end
 
     def save_deal(deal_id)
       if !saved_deals.any? { |deal| deal.deal_id == deal_id }

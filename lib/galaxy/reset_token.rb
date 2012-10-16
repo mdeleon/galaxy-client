@@ -1,7 +1,5 @@
 module Galaxy
   class ResetToken < Galaxy::Base
-    def user
-      User.find(user_id)
-    end
+    belongs_to :user
   end
 end

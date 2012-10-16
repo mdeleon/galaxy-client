@@ -34,22 +34,26 @@ module Galaxy
 
       init_default_params(resource, opts)
 
-      class_eval( %Q[
-        def #{resource_name}(params={})
-          return unless self.id.present?
-          params = params.merge(default_params(:#{resource_name}))
+      define_method resource_name do |params={ }|
+        return unless self.id.present?
+        params = params.merge(default_params(resource_name.to_sym))
 
-          @#{resource_name} ||= if self.attributes[:#{resource_name}].present?
-            self.attributes[:#{resource_name}].map{|r| model_for(:#{resource_type}).new(r.attributes)}
-          else
-            model_for(:#{resource_type}).find(
-              :#{quantity_select},
-              :from => "/\#{self.class.path}/#{klass_path}/\#{self.id}/#{resource_path}.json",
-              :params => params)
-          end
+        retval = instance_variable_get("@#{resource_name}")
+        unless retval
+          retval = if self.attributes[resource_name.to_sym].present?
+                     self.attributes[resource_name.to_sym].map { |r| model_for(resource_type.to_sym).new(r.attributes) }
+                   else
+                     model_for(resource_type.to_sym).find(
+                       quantity_select.to_sym,
+                       :from   => "/#{self.class.path}/#{klass_path}/#{self.id}/#{resource_path}.json",
+                       :params => params)
+                   end
+          instance_variable_set("@#{resource_name}", retval)
         end
-      ])
+        retval
+      end
     end
+
 
     def self.has_one(resource, opts={})
       has_many(resource, opts.merge(:select => 'one'))

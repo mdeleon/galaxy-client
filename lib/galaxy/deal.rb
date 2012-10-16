@@ -202,6 +202,7 @@ module Galaxy
 
     def image(size="medium")
       return if images.blank?
+      size ||= "medium"
 
       #use attributes to avoid ActiveResource automapping to Deal::IMage
       # Maybe this is just a DUPE THING?

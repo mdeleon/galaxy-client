@@ -32,11 +32,18 @@ module Galaxy
       quantity_select = opts[:select] || "all"
       resource_path = resource_path.pluralize if quantity_select == "all"
 
-      init_default_params(resource, opts)
+      default_params_hash_or_proc = opts[:default_params] || {}
 
       define_method resource_name do |params={ }|
         return unless self.id.present?
-        params = params.merge(default_params(resource_name.to_sym))
+
+        default_params_hash = if default_params_hash_or_proc.respond_to?(:call)
+                                default_params_hash_or_proc.call(self)
+                              else
+                                default_params_hash_or_proc
+                              end
+
+        params = params.merge(default_params_hash)
 
         retval = instance_variable_get("@#{resource_name}")
         unless retval
@@ -63,11 +70,19 @@ module Galaxy
       resource_name = resource.to_s
       resource_key = "#{resource}_id"
       resource_type = (opts[:class].presence || resource_name).to_s.demodulize.underscore
-      init_default_params(resource, opts)
+
+      default_params_hash_or_proc = opts[:default_params] || {}
 
       define_method resource_name do |params={ }|
         return unless self.id.present?
-        params = params.merge(default_params(resource_name.to_sym))
+
+        default_params_hash = if default_params_hash_or_proc.respond_to?(:call)
+                                default_params_hash_or_proc.call(self)
+                              else
+                                default_params_hash_or_proc
+                              end
+
+        params = params.merge(default_params_hash)
 
         retval = instance_variable_get("@#{resource_name}")
         unless retval
@@ -85,16 +100,6 @@ module Galaxy
 
     def self.model_key
       self.to_s.demodulize
-    end
-
-    def self.init_default_params(resource, opts)
-      @@default_params ||= {}; @@default_params[model_key] ||= {}
-      @@default_params[self.to_s.demodulize][resource.to_sym] = opts.delete(:default_params) || {}
-    end
-
-    def default_params(resource_name)
-      param = @@default_params[self.class.model_key][resource_name.to_sym]
-      param.respond_to?(:call) ?  param.call(self) : param
     end
 
     # This method takes a galaxy client model name and returns the corresponding model class

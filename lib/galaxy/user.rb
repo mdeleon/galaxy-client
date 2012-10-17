@@ -85,7 +85,7 @@ module Galaxy
     end
 
     def full_name
-      "#{self.firstname}#{self.lastname && " #{self.lastname}"}"
+      "#{self.firstname}#{self.lastname && " #{self.lastname}"}".strip
     end
 
     def has_firstname?

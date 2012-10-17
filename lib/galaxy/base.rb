@@ -89,7 +89,7 @@ module Galaxy
           retval = if self.attributes[resource_name.to_sym].present?
                      model_for(resource_type.to_sym).new(self.attributes[resource_name.to_sym].attributes)
                    elsif self.attributes[resource_key.to_sym].present?
-                     model_for(resource_type.to_sym).find(resource_key.to_sym, :params => params)
+                     model_for(resource_type.to_sym).find(self.attributes[resource_key.to_sym], :params => params)
                    else
                      raise "missing resource key #{resource_key}"
                    end

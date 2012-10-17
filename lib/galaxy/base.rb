@@ -74,8 +74,6 @@ module Galaxy
       default_params_hash_or_proc = opts[:default_params] || {}
 
       define_method resource_name do |params={ }|
-        return unless self.id.present?
-
         default_params_hash = if default_params_hash_or_proc.respond_to?(:call)
                                 default_params_hash_or_proc.call(self)
                               else
@@ -93,6 +91,7 @@ module Galaxy
                    else
                      raise "missing resource key #{resource_key}"
                    end
+          instance_variable_set("@#{resource_name}", retval)
         end
         retval
       end

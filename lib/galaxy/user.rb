@@ -47,11 +47,6 @@ module Galaxy
       find(:all, from: "/api/v2/users/find_by_email.json", params: {email: email})
     end
 
-    def self.unsubscribe_by_email_token(email_token, region_id)
-      user = User.from_email_token(email_token)
-      user.unsubscribe_by_region_id(region_id) if user
-    end
-
     def self.authenticate(email, passwd)
       new(get(:authenticate, email: email, pass: passwd), true)
     rescue ActiveResource::ResourceInvalid => e
@@ -130,7 +125,6 @@ module Galaxy
 
     ##======================= COUPON STUFF ===============================
 
-
     def active_coupons
       coupons.keep_if{|coupon| coupon.active?}.reverse
     end
@@ -158,41 +152,35 @@ module Galaxy
       subscriptions.uniq_by { |sub| sub.region_id }
     end
 
-    def regions_not_subscribed_before
-      subscribed_region_ids = subscriptions.collect{|s| s.region_id}.compact.uniq
-      Region.selectable_regions.select{ |r| !subscribed_region_ids.include?(r.id) }
+    def unsubscribe_from_all
+      subscriptions.each do |s|
+        s.unsubscribe if s.active?
+      end
     end
 
-    def unsubscribe_by_region_id(region_id)
-      account_changed = false
-      subscriptions.each do |sub|
-        if sub.region_id == region_id && sub.active? && sub.modifiable?
-          sub.unsubscribe
-          account_changed = true
+    def subscribe_by_region(region)
+      #clear the cache of galaxy-client
+      @subscriptions = nil
+      region = region.id if region.is_a? Region
+
+      if sub = subscriptions.find { |s| s.region_id == region }
+        sub.subscribe
+      else
+        Subscription.create(:user_id => id, :region_id => region)
+      end
+    end
+
+    def subscribe_by_zip(zip=nil)
+      @subscriptions = nil
+      Subscription.create(:zip => zip || self.postal_code, :user_id => self.id)
+
+      self.subscriptions.each do |s|
+        if s.active?
+          r = Region.find(s.region_id)
+          s.unsubscribe if r && !r.active?
         end
       end
-      Email.account_change(id) if account_changed
     end
-
-    def subscribe_by_region(region_id)
-      sub = subscriptions.find { |s| s.region_id == region_id } || Subscription.create!(:user_id => id, :region_id => region_id, :zip => nil)
-
-      # set subscriptions to nil for clear the cache of galaxy-client
-      @subscriptions = nil
-      update_subscriptions_status(sub.region_id, "active").find{ |s| s.id.to_s == sub.id.to_s } || sub
-    end
-
-    def update_subscriptions_status(region_id, status)
-      puts subscriptions.inspect
-      subs_need_update = subscriptions.select { |sub| sub.status != status && sub.region_id == region_id  && sub.modifiable?}
-      subs_need_update.each do |sub|
-        sub.status = status
-        sub.save!
-      end
-      Email.account_change(id) if subs_need_update.size > 0
-      subs_need_update
-    end
-
 
     ##======================= CARD LINKS STUFF ===============================
 

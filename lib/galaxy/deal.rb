@@ -179,22 +179,14 @@ module Galaxy
     end
 
     def image_url(size="medium")
-      i = image(size) and i[:url]
+      image(size).try(:url)
     end
 
     def image(size="medium")
       return if images.blank?
       size ||= "medium"
 
-      #use attributes to avoid ActiveResource automapping to Deal::IMage
-      # Maybe this is just a DUPE THING?
-      img = images.select{|x| x.attributes.has_key?(size)}.first.send(size.to_sym)
-      if img.present?
-        img.attributes
-      else
-        default = images.first.attributes
-        default[default.keys.first].attributes
-      end
+      images.select{|x| x.size == size}.first || images.first
     end
   end
 end

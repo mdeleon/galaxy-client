@@ -17,13 +17,17 @@ module Galaxy
     end
 
     def unsubscribe
-      self.status = "inactive"
-      save!
+      unless inactive?
+        self.status = "inactive" and save!
+      end
+      self
     end
 
     def subscribe
-      self.status = "active"
-      save!
+      unless active?
+        self.status = "active" and save!
+      end
+      self
     end
 
     def active?
@@ -36,10 +40,6 @@ module Galaxy
 
     def pause
       put(:pause)
-    end
-
-    def modifiable?
-      true
     end
   end
 end

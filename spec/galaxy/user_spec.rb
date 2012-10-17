@@ -45,6 +45,26 @@ describe Galaxy::User do
     end
   end
 
+  describe "#administered_merchants" do
+    it "hits /users/<slug>/administered_merchants and returns a Galaxy::Merchant" do
+      mock_galaxy(:get, "/api/v2/users/#{subject.id}/administered_merchants.json", get_headers, [Galaxy::Merchant.new(:slug => "wtf")].to_json, 200)
+      administered_merchant = subject.administered_merchants.first
+      expect(administered_merchant.class).to be(Galaxy::Merchant)
+      expect(administered_merchant.slug).to eq("wtf")
+    end
+    context "top-level Merchant defined" do
+      it "hits /users/<slug>/administered_merchants and returns a ::Merchant" do
+        class Merchant < Galaxy::Merchant
+        end
+
+        mock_galaxy(:get, "/api/v2/users/#{subject.id}/administered_merchants.json", get_headers, [Merchant.new(:slug => "wtf")].to_json, 200)
+        administered_merchant = subject.administered_merchants.first
+        expect(administered_merchant.class).to be(::Merchant)
+        expect(administered_merchant.slug).to eq("wtf")
+      end
+    end
+  end
+
   describe "#full_name" do
     context "user with a full_name" do
       it "should get the full_name" do

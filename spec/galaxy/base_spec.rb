@@ -2,11 +2,18 @@ require File.expand_path('../../spec_helper', __FILE__)
 require "galaxy/base"
 
 describe Galaxy::Base do
+  class Galaxy::TopLevelObject < Galaxy::Base
+  end
+
+  class TopLevelObject < Galaxy::TopLevelObject
+  end
+
   class Galaxy::Model < Galaxy::Base
   end
 
   class Galaxy::Bar < Galaxy::Base
     has_many :deals
+    has_many :things, :class => TopLevelObject
   end
 
   class Galaxy::Foo < Galaxy::Base
@@ -40,6 +47,10 @@ describe Galaxy::Base do
   describe ".has_many" do
     subject {Galaxy::Bar.new(:id => 4)}
     context 'default params are set' do
+      it "can access its 'things' (top level class)" do
+        TopLevelObject.should_receive(:find).with(:all, :from => "/api/v2/bars/4/things.json", :params => {}).and_return([])
+        subject.things
+      end
       context 'default params are a proc' do
         subject{Galaxy::Foo.new(:id =>1)}
 

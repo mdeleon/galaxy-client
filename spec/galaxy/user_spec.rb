@@ -65,6 +65,28 @@ describe Galaxy::User do
     end
   end
 
+  describe "#num_already_purchased" do
+    # active_purchases.map { |x| x.deal_id == deal.id ? x.num_bought : 0}.reduce(&:+) || 0
+    let(:deal) { double :deal, id: "deal-id" }
+
+    context "no active_purchases" do
+      it "returns 0" do
+        subject.stub(:active_purchases).and_return []
+        expect(subject.num_already_purchased(deal)).to eq(0)
+      end
+    end
+
+    context "with active_purchases" do
+      let(:other_deal_purchase) { double :other_deal_purchase, deal_id: "other-deal", :num_bought => 12 }
+      let(:purchase) { double :purchase, deal_id: "deal-id", :num_bought => 10 }
+
+      it "returns purchase number bought" do
+        subject.stub(:active_purchases).and_return [other_deal_purchase, purchase]
+        expect(subject.num_already_purchased(deal)).to eq(10)
+      end
+    end
+  end
+
   describe "#full_name" do
     context "user with a full_name" do
       it "should get the full_name" do

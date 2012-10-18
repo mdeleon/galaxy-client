@@ -100,7 +100,6 @@ module Galaxy
       has_firstname? && has_lastname?
     end
 
-
     ##======================= PURCHASE STUFF ===============================
 
     def num_already_purchased(deal)
@@ -117,6 +116,10 @@ module Galaxy
       else
         coupons.any? { |coupon| coupon.deal_id == deal.id && coupon.state != "cancelled" }
       end
+    end
+
+    def num_already_purchased(deal)
+      active_purchases.map { |x| x.deal_id == deal.id ? x.num_bought : 0}.reduce(&:+) || 0
     end
 
     def find_purchase(purchase_id)

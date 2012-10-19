@@ -27,7 +27,7 @@ module Galaxy
     end
 
     def credits_in_dollars
-      (credits || 0)/100
+      (credits || 0).to_f/100.0
     end
 
     def formated_quantity

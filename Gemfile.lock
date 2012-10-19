@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    galaxy-client (0.0.1)
+    galaxy-client (0.0.2)
       activeresource
 
 GEM

@@ -26,10 +26,6 @@ module Galaxy
       expire_at && expire_at.strftime('%m/%d/%Y');
     end
 
-    def credits_in_dollars
-      (credits || 0).to_f/100.0
-    end
-
     def formated_quantity
       quantity.to_s.reverse.gsub(/...(?=.)/,'\&,').reverse
     end

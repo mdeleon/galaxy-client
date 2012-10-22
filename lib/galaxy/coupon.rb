@@ -1,7 +1,17 @@
 module Galaxy
   class Coupon < Galaxy::Base
-    timeify :created_at, :redeemed_at, :expires_at
-    
+    extend Timeify
+
+    timeify :expires_at, :redeemed_at, :expires_at, :created_at
+
+    belongs_to :credit_card
+    belongs_to :purchase
+    belongs_to :deal
+
+    def self.find_by_barcode(barcode)
+      find(:all, from: "/api/v2/coupons/find_by_barcode.json", params: {:barcode => barcode})
+    end
+
     def redeem(params={})
       begin
         put(:redeem, params)
@@ -20,16 +30,52 @@ module Galaxy
       @address ||= purchase.location
     end
 
-    def purchase
-      @purchase ||= model_for(:purchase).find(self.purchase_id)
+    def location_specific?
+      self.purchase.location.present?
     end
 
-    def deal
-      @deal ||= model_for(:deal).find(self.deal_id)
+    def expiry(timezone)
+      expires_at ? expires_at.in_time_zone(timezone) : nil
     end
 
-    def self.find_by_barcode(barcode)
-      find(:all, from: "/api/v2/coupons/find_by_barcode.json", params: {:barcode => barcode})
+    def has_expiration_date?
+      expires_at.present?
+    end
+
+    def expired?
+      state == 'expired' or (valid? and expires_at and expires_at.to_date.end_of_day <= Time.now)
+    end
+
+    def expiring_soon?
+      valid? and !expired? and expires_at and  expires_at - 14.days < Time.now
+    end
+
+    def valid?
+      state == 'valid'
+    end
+
+    def inactive?
+      !active?
+    end
+
+    def cancelled?
+      state == 'cancelled'
+    end
+
+    def active?
+      (!cancelled? && !redeemed? && !expired?)
+    end
+
+    def redeemed?
+      state == 'redeemed'
+    end
+
+    def deal_shareable?
+      active?
+    end
+
+    def printable?
+      !!(purchase.printable? and !redeemed? and !cancelled?)
     end
   end
 end

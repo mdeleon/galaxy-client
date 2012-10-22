@@ -9,4 +9,56 @@ describe Galaxy::Promotion do
       promotion.apply_to_user("foo@example.com")
     end
   end
+
+ describe "#ended?" do
+    it "return true if ended" do
+      promotion = Galaxy::Promotion.new(:end_at => Time.now)
+      promotion.ended?.should be_true
+    end
+    it "return false if not ended" do
+      promotion = Galaxy::Promotion.new(:end_at => Time.now + 3600)
+      promotion.ended?.should be_false
+    end
+  end
+
+  describe "#sold_out?" do
+    it "return true if sold_out" do
+      promotion = Galaxy::Promotion.new(:redemptions => 10, :quantity => 10)
+      promotion.sold_out?.should be_true
+    end
+    it "return false if not sold_out" do
+      promotion = Galaxy::Promotion.new(:redemptions => 1, :quantity => 10)
+      promotion.sold_out?.should be_false
+    end
+  end
+
+  describe "#started?" do
+    it "return true if started" do
+      promotion = Galaxy::Promotion.new(:start_at => Time.now)
+      promotion.started?.should be_true
+    end
+    it "return false if not started" do
+      promotion = Galaxy::Promotion.new(:start_at => Time.now + 3600)
+      promotion.started?.should be_false
+    end
+  end
+
+
+  describe "#active?" do
+    it "is active if state is active" do
+      promotion = Galaxy::Promotion.new(:state => 'active')
+      promotion.should be_active
+    end
+
+    it "is not active if state is inactive" do
+      promotion = Galaxy::Promotion.new(:state => 'inactive')
+      promotion.should_not be_active
+    end
+
+    it "is not active if state is cancelled" do
+      promotion = Galaxy::Promotion.new(:state => 'cancelled')
+      promotion.should_not be_active
+    end
+  end
+
 end

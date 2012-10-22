@@ -23,6 +23,9 @@ Gem::Specification.new do |s|
   s.add_development_dependency "yard"
   s.add_development_dependency "rdiscount"
   s.add_development_dependency "rdoc"
+  s.add_development_dependency "guard"
+  s.add_development_dependency "guard-rspec"
+
 
   s.files        = `git ls-files`.split("\n")
   s.executables  = `git ls-files`.split("\n").select{|f| f =~ /^bin/}

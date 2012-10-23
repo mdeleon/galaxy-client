@@ -260,22 +260,6 @@ describe Galaxy::User do
         expect(subject.fulfilled_deal?(deal)).to be_false
       end
     end
-
-    context "it's an daily deal" do
-      let(:deal) { double(:deal, :id => 1, :card_linked? => false) }
-      let(:unredeemed_coupon)    { double(:coupon, :deal_id => deal.id, :redeemed? => false) }
-      let(:redeemed_coupon) { double(:coupon, :deal_id => deal.id, :redeemed? => true) }
-
-      it "should return true for a redeemed coupon" do
-        subject.stub(:coupons).and_return([redeemed_coupon])
-        expect(subject.fulfilled_deal?(deal)).to be_true
-      end
-
-      it "should return false for a unredeemed coupon" do
-        subject.stub(:coupons).and_return([unredeemed_coupon])
-        expect(subject.fulfilled_deal?(deal)).to be_false
-      end
-    end
   end
 
   describe "#relink_deal" do

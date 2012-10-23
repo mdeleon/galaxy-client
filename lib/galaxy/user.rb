@@ -187,11 +187,9 @@ module Galaxy
 
     ##======================= CARD LINKS STUFF ===============================
 
-     def fulfilled_deal?(deal)
+    def fulfilled_deal?(deal)
       if deal.card_linked?
         card_link_for(deal.id).try(:fulfilled?)
-      else
-        coupons.find { |coupon| coupon.deal_id == deal.id && coupon.redeemed? }
       end
     end
 

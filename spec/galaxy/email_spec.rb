@@ -42,4 +42,10 @@ describe Galaxy::Email do
     end
   end
 
+  describe ".welcome" do
+    it "sends POST to /emails/welcome.json with params" do
+      mock_galaxy(:post, "/api/v2/emails/welcome.json?user_id=d92kd030", post_headers, nil, 200)
+      Galaxy::Email.welcome("d92kd030")
+    end
+  end
 end

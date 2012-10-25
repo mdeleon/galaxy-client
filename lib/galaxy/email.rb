@@ -68,10 +68,6 @@ module Galaxy
     def self.welcome(user_id)
       params = {user_id: user_id}
       post(:welcome, params)
-    rescue ActiveResource::ResourceInvalid => e
-      instance = new(params)
-      instance.load_remote_errors(e)
-      raise ActiveResource::ResourceInvaild.new(instance)
     end
   end
 end

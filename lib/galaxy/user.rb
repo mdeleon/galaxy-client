@@ -76,8 +76,8 @@ module Galaxy
       raise ActiveResource::ResourceInvalid.new(self)
     end
 
-    def blacklist
-      put(:blacklist)
+    def blacklist(reason = "deactivated-web")
+      put(:blacklist, {:reason => reason})
     end
 
     def best_name

@@ -31,6 +31,10 @@ module Galaxy
     def running?
       started? and !ended?
     end
+    
+    def fine_print
+      super ? super.gsub("</div>","").split("<div>") : []
+    end
 
     def time_left
       Time.now - end_at

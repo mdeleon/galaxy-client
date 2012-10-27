@@ -1,6 +1,6 @@
 module Galaxy
   class Deal < Galaxy::Base
-    timeify :start_at, :end_at, :expiry_as_of_now, :expires_at
+    timeify :start_at, :end_at, :expires_at
 
     has_many :purchases
     has_many :locations
@@ -46,7 +46,7 @@ module Galaxy
     end
 
     def expired?
-      soldout? || (self.expires_at and self.expires_at <= Time.now)
+      soldout? || (self.expiry and self.expiry <= Time.now)
     end
 
     def hide_addresses?
@@ -157,9 +157,10 @@ module Galaxy
       [self.num_left, (self.max_per_user || 10) - num_already_purchased].compact.min
     end
 
-    def expiry(timezone = region.timezone)
-      expiry_as_of_now ? expiry_as_of_now.in_time_zone(timezone) : nil
+    def expiry(timezone = nil)
+      timezone ? expires_at.try(:in_time_zone, timezone) : expires_at
     end
+    alias :expiry_as_of_now :expiry
 
     def buyable?(user=nil)
       !expired? && in_flight? && max_purchasable(user) > 0

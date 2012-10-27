@@ -47,7 +47,7 @@ module Galaxy
 
         retval = instance_variable_get("@#{resource_name}")
         unless retval
-          retval = if self.attributes[resource_name.to_sym].present?
+          retval = if self.attributes.has_key?(resource_name.to_sym)
                      self.attributes[resource_name.to_sym].map { |r| model_for(resource_type.to_sym).new(r.attributes) }
                    else
                      model_for(resource_type.to_sym).find(
@@ -84,7 +84,7 @@ module Galaxy
 
         retval = instance_variable_get("@#{resource_name}")
         unless retval
-          retval = if self.attributes[resource_name.to_sym].present?
+          retval = if self.attributes.has_key?(resource_name.to_sym)
                      model_for(resource_type.to_sym).new(self.attributes[resource_name.to_sym].attributes)
                    elsif self.attributes[resource_key.to_sym].present?
                      model_for(resource_type.to_sym).find(self.attributes[resource_key.to_sym], :params => params)

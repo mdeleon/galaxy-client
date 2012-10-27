@@ -6,13 +6,12 @@ describe Galaxy::Deal do
   subject {
     Galaxy::Deal.new :start_at => nil,
     :end_at => nil,
-    :expiry_as_of_now => nil,
     :expires_at => nil,
     :expired? => nil,
     :region => nil
   }
 
-  it_timeifies :start_at, :end_at, :expiry_as_of_now, :expires_at
+  it_timeifies :start_at, :end_at, :expires_at
 
   has_predicate(:approved?).by_field(:state).with_true_value_of("approved")
   has_predicate(:approved?).by_field(:state).with_true_value_of("in-flight")
@@ -179,7 +178,7 @@ describe Galaxy::Deal do
 
   describe "#expiry" do
     it "expiry_as_of_now is not nil" do
-      subject.stub(:expiry_as_of_now => (Time.now + 3.days))
+      subject.stub(:expires_at => (Time.now + 3.days))
       subject.expiry(ActiveSupport::TimeZone.new("America/Denver")).zone.should == "MDT"
     end
 

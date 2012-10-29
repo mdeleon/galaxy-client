@@ -32,8 +32,8 @@ module Galaxy
       started? and !ended?
     end
     
-    def fine_print
-      super ? super.gsub("</div>","").split("<div>") : []
+    def fine_print_list
+      fine_print ? fine_print.gsub("</div>","").split("<div>") : []
     end
 
     def time_left
